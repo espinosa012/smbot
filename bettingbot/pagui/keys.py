@@ -1,0 +1,2 @@
+CONTROL = 'ctrl'
+ESCAPE = 'escape'

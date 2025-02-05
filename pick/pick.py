@@ -15,3 +15,8 @@ class Pick:
 
     def is_valid_pick(self) -> bool:
         return False
+    
+
+# no sé...
+class Selection:
+    pass

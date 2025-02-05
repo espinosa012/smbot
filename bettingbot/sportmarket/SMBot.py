@@ -19,15 +19,16 @@ class SMBot:
         self.load_driver()
 
     # Config
-    def load_driver(self):
-        self.driver = get_driver()
-        self.driver.get(self.config["sportmarket_url"])
-
     def load_config(self):
         self.config = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config/params.json'), 'r'))
     
     def load_users(self):
         self.users = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../config/users.json'), 'r'))["sportmarket"]
+
+    def load_driver(self):
+        self.driver = _selenium.get_driver()
+        self.driver.get(self.config["sportmarket_url"])
+        # self.driver.get("https://deviceandbrowserinfo.com/info_device")
 
 
     # SportMarket
@@ -35,7 +36,9 @@ class SMBot:
         # iniciar sesión
         sm.login(self.driver, user["username"], user["password"])
         # buscar el evento
-        pass
+        sm.search_event(self.driver, "Betis ")
+        input()
+
         # comprobar la cuota y apostar si procede
         pass
 

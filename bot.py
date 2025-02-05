@@ -7,12 +7,12 @@ from bettingbot.sportmarket.pageobject import *
 
 if __name__ == "__main__":
     
-    # bot = SMBot()
-        # pruebas
-    # bot.place_bet(bot.users[0], None)
+    bot = SMBot()
+    # pruebas
+    bot.place_bet(bot.users[0], None)
     
-    # input()
+    input()
         
-    reader = MailReader()
-    reader.connect()
-    reader.watch_inbox()
+    # reader = MailReader()
+    # reader.connect()
+    # reader.watch_inbox()

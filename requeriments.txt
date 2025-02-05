@@ -3,3 +3,4 @@ setuptools
 selenium
 undetected-chromedriver
 bs4
+pyautogui
