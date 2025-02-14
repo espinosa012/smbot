@@ -25,7 +25,7 @@ def type_text(text : str):
     pyautogui.typewrite(text)
 
 def random_wait(min : float, max : float):
-    random.uniform(min, max)
+    time.sleep(random.uniform(min, max))
 
 
 # TODO: parametrizar las esperas

@@ -4,8 +4,11 @@ class Pick:
     
     Date : str
     Event : str
-    Bet : str
+    Participants : list = []
+    Bet : dict = {} # {market, selection}
     MinOdds : float
+    Stake : float   # cantidad a apostar en términos absolutos ??
+    BetaminicStrategy : str
 
     def __init__(self):
         pass
@@ -17,6 +20,3 @@ class Pick:
         return False
     
 
-# no sé...
-class Selection:
-    pass

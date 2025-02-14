@@ -1,5 +1,7 @@
 import os
 import json
+import time
+
 import bettingbot.selenium_utilities as _selenium
 import bettingbot.sportmarket.sm_utilities as sm 
 from pick.pick import Pick
@@ -23,22 +25,23 @@ class SMBot:
         self.config = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config/params.json'), 'r'))
     
     def load_users(self):
-        self.users = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../config/users.json'), 'r'))["sportmarket"]
+        self.users = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../config/users.json'),
+                                    'r'))["sportmarket"]
 
     def load_driver(self):
         self.driver = _selenium.get_driver()
-        self.driver.get(self.config["sportmarket_url"])
-        # self.driver.get("https://deviceandbrowserinfo.com/info_device")
 
-
-    # SportMarket
+    # SportMarket/Betinasia black
     def place_bet(self, user : dict, pick : Pick) -> None:
+        self.driver.get(user["url"])
         # iniciar sesión
         sm.login(self.driver, user["username"], user["password"])
         # buscar el evento
-        sm.search_event(self.driver, "Betis ")
-        input()
-
+        # TODO: comprobar antes si ya está en favs
+        sm.search_event(self.driver, pick.Event)
         # comprobar la cuota y apostar si procede
-        pass
-
+        if sm.check_odds(self.driver, pick.Event, pick.MinOdds, pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
+            sm.place_bet(self.driver, pick.Event, pick.Bet, pick.Stake)
+        # eliminar de favoritos (opcional)
+        sm.remove_event_from_favourites(self.driver, pick.Event)
+        time.sleep(10)

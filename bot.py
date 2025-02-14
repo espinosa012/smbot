@@ -1,18 +1,20 @@
-import redis
-from mail.mail_reader import MailReader
-from bettingbot.selenium_utilities import get_driver
 from bettingbot.sportmarket.SMBot import SMBot
-from bettingbot.sportmarket import sm_utilities
-from bettingbot.sportmarket.pageobject import *
+from mail.mail_reader import MailReader
+from pick.pick import Pick
 
 if __name__ == "__main__":
     
-    bot = SMBot()
-    # pruebas
-    bot.place_bet(bot.users[0], None)
-    
-    input()
-        
-    # reader = MailReader()
-    # reader.connect()
+    # bot = SMBot()
+    # # pruebas
+    # pick : Pick = Pick()
+    # pick.Event = "Girona FC - Getafe"
+    # pick.Bet = {"market": "AH", "selection":"H"}
+    # pick.MinOdds = 1.6
+    # pick.Stake = 1
+    #
+    # bot.place_bet(bot.users[1], pick)
+
+    reader = MailReader()
+    reader.connect()
     # reader.watch_inbox()
+    reader.watch()
