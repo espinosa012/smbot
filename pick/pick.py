@@ -9,6 +9,7 @@ class Pick:
     MinOdds : float
     Stake : float   # cantidad a apostar en términos absolutos ??
     BetaminicStrategy : str
+    MessageId : int
 
     def __init__(self):
         pass

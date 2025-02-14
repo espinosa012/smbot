@@ -13,7 +13,7 @@ def login(driver: uc.Chrome, username: str, password: str) -> None:
     pagui.random_wait(0.5, 1)
 
 # SEARCHING EVENT
-def search_event(driver: uc.Chrome, event: str) -> bool:  # true si lo encuentra, false si no
+def set_favourite_event(driver: uc.Chrome, event: str) -> bool:  # true si lo encuentra, false si no
     open_search_modal(driver, True) # con 1 reintento
     search_event_in_search_modal(driver, event)
     return sel_util.is_element_present(driver, pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR)
@@ -34,16 +34,16 @@ def search_event_in_search_modal(driver: uc.Chrome, event: str) -> None:
     pagui.random_wait(0.2, 0.45)
     sel_util.selenium_send_keys(driver, pom.SEARCH_BAR_INPUT, event)
     pagui.random_wait(0.8, 1.2)
-    # click en la tarjeta con el resultado deseado
+    # clic en la tarjeta con el resultado deseado
     select_search_result(driver, event)
     pagui.random_wait(0.5, 1.2)
 
 def select_search_result(driver: uc.Chrome, event: str) -> None:
     # TODO: se puede mejorar. No hacer clic en la primera tarjeta, buscar la tarjeta según el contenido del string event
     sel_util.selenium_click(driver, pom.SEARCH_RESULT_CARD)
-    pagui.random_wait(0.4, 0.7)
     # esperamos que se oculte el modal y una cantidad aleatoria de tiempo, o que sea clickable el botón de la cuota
     sel_util.wait_element_invisible(driver, pom.SEARCH_MODAL_DIV, 3)
+    pagui.random_wait(0.4, 0.7)
 
 
 # MARKETS
@@ -59,7 +59,6 @@ def place_bet(driver : uc.Chrome, event : str, bet : dict, stake : float):
     # cerrar el modal
     close_placer_modal(driver)
 
-# TODO: usar get_selection_webelement_by_event_and_bet
 def click_selection(driver : uc.Chrome, event : str, bet : dict):
     sel_util.selenium_click(driver, get_selection_xpath_by_event_and_bet(driver, event, bet))
 
@@ -97,7 +96,7 @@ def get_odds(driver: uc.Chrome, event: str, bet: dict) -> float:
     bet_web_element = sel_util.find_element_by_xpath(driver, bet_web_element_xpath)
     if bet_web_element:
         return float(bet_web_element.text)
-    return 0    # tODO: informar por logger
+    return 0    # TODO: informar por logger
 
 def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : dict) -> str | None:
     event_row_xpath: str = get_favourite_event_row_xpath(driver, event)
@@ -118,6 +117,7 @@ def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : 
                 return event_row_xpath + pom.EVENT_SELECTION_AH_HOME_TD
         if bet["selection"] == "A":
                 return event_row_xpath + pom.EVENT_SELECTION_AH_AWAY_TD
+    # TODO: enum de mercados y selections
     return ""
 
 def get_favourite_event_row_xpath(driver : uc.Chrome, event : str) -> str:
