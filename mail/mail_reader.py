@@ -2,8 +2,9 @@ import time
 import json
 import imaplib
 import email
-from mail.gmail_message import GmailMessage
 
+from data.redis_handler import RedisHandler
+from mail.gmail_message import GmailMessage
 
 class MailReader:
     Email: str
@@ -13,14 +14,20 @@ class MailReader:
     MailBox: str  # "INBOX", ...
     CredentialsFilePath: str
     SleepTime: int
+    RedisConn: RedisHandler
 
-    def __init__(self, creds_file_path: str = "config/config.json", _filter: str = "ALL", mail_box: str = "INBOX",
+    def __init__(self, _filter: str = "ALL", mail_box: str = "INBOX",
                  sleep_time: int = 5):
         self.Email, self.Password = self.get_credentials()
         self.Filter = _filter
         self.MailBox = mail_box
-        self.CredentialsFilePath = creds_file_path
         self.SleepTime = sleep_time
+        self.redis_setup()
+
+    def redis_setup(self):
+        with open("config/config.json", "r") as creds_file:
+            redis_config = json.load(creds_file)["redis"]
+        self.RedisConn = RedisHandler(str(redis_config["host"]), int(redis_config["port"]), int(redis_config["db"]))
 
     @staticmethod
     def get_credentials():
@@ -32,56 +39,51 @@ class MailReader:
         self.Connection = imaplib.IMAP4_SSL("imap.gmail.com")
         self.Connection.login(self.Email, self.Password)
 
+
+
     # Reading messages
     def get_most_recent_message_id(self):
         ids = self.get_current_message_ids()
         if ids:
             return ids[-1]
         return None
-        #     TODO cambiar para que coja la id única del mensaje y poder guardar las ids procesadas
 
     def get_current_message_ids(self) -> list:
-        return self.Connection.search(None, self.Filter)[1][0].split()
+        return self.Connection.uid("search", None, self.Filter)[1][0].split()
 
-    # noinspection PyUnresolvedReferences,PyTypeChecker
-    def get_message_by_id(self, _id: int):
-        # TODO: gestionar la excepción aquí, y no en la llamada
+    def get_message_by_id(self, uid: int):
         try:
-            _type, data = self.Connection.fetch(_id, "(RFC822)")
-            return email.message_from_bytes(data[0][1])
+            # _type, data = self.Connection.fetch(_id, "(RFC822)")
+            _type, data = self.Connection.uid("fetch", uid, "(RFC822)")
+            msg_obj = email.message_from_bytes(data[0][1])
+            msg_obj["UID"] = int(uid)
+            return msg_obj
         except Exception as e:
             print(e)    # TODO: al logger
         return None
 
     def watch(self):
-        self.Connection.select(self.MailBox)
+        while True:
+            self.Connection.select(self.MailBox)
+            # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
+            processed_ids: list = []    # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
+            new_ids: list = self.get_current_message_ids()
+            # obtenemos la lista de ids a procesar, que serán las que estén en la bandeja de entrada y no en processed_ids
+            ids_to_process: list = list(set(new_ids) - set(processed_ids))
+            # procesamos las ids no procesadas y lanzamos los picks, con redis o lo que sea.
+            self.process_ids(ids_to_process)
+            time.sleep(self.SleepTime)
 
-        # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
-        processed_ids: list = []    # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
-        new_ids: list = self.get_current_message_ids()
-        # obtenemos la lista de ids a procesar, que serán las que estén en la bandeja de entrada y no en processed_ids
-        ids_to_process: list = list(set(new_ids) - set(
-            processed_ids))  # TODO: ordenar antes los sets para ir colocando en el orden de la bandeja de entrada, o el inverso
-        # procesamos las ids no procesadas y lanzamos los picks, con redis o lo que sea.
+    def process_ids(self, ids_to_process : list):
         for _id in ids_to_process:
-            # TODO: obtener aqui el msgobj y pasarselo a get_message_picks por eficiencia. puede ser nulo
-            if self.is_pick_message(_id):
+            msg_obj = self.get_message_by_id(_id)
+            if msg_obj and self.is_pick_message(msg_obj):
                 # si es un mensaje de pick, formamos la lista de objetos picks
-                message_picks: list = self.get_message_picks(_id)
-                for mp in message_picks:
+                for mp in GmailMessage(msg_obj).get_picks_from_message():
                     # TODO: lo guardamos en la base de datos y emitimos con redis un mensaje con la id que tiene en db
+                    self.RedisConn.emit_pick_message(mp)
                     pass
-            # las ids que se van procesando se meten en la lista processed_ids
-            processed_ids.append(_id)
-        time.sleep(self.SleepTime)
 
-    def get_message_picks(self, _id : int) -> list:
-        msg_obj = self.get_message_by_id(_id)
-        if msg_obj:
-            return GmailMessage(msg_obj).get_picks_from_message()
-        return []
-
-    def is_pick_message(self, _id: int):
-        # TODO: necesitamos una manera de determinar si es un mensaje de pick; el asunto, algún flag, etc
-        return True
-
+    @staticmethod
+    def is_pick_message(msg : email.message.Message):
+        return "Picks" in msg["Subject"].strip()

@@ -1,10 +1,9 @@
 from bs4 import BeautifulSoup
-import email
 
 from pick.pick import Pick
 
 
-class GmailMessage():
+class GmailMessage:
 
     MessageObj = None
 
@@ -12,7 +11,8 @@ class GmailMessage():
     From : str 
     To : str 
     Date : str 
-    MessageHtml : str 
+    UID : int
+    MessageHtml : str
 
     def __init__(self, message_obj):
         self.MessageObj = message_obj
@@ -23,6 +23,7 @@ class GmailMessage():
         self.From = self.MessageObj["From"]
         self.To = self.MessageObj["To"]
         self.Date = self.MessageObj["Date"]
+        self.UID = self.MessageObj["UID"]
         self.set_message_html()
 
     def set_message_html(self) -> None:
@@ -33,21 +34,20 @@ class GmailMessage():
         message_picks : list = []
         # llevar a pick
         soup = BeautifulSoup(self.MessageHtml, 'html.parser')
-        # TODO: el número de picks coincide con el número de ul???
         for ul in soup.find_all("ul"):
             pick: Pick = Pick()
             values = [t.strip() for t in ul.text.strip().split("=09")]
             pick.Event = values[4].split(":")[1].strip()
             pick.Participants = [p.strip() for p in pick.Event.split(" - ")]
-            self.set_pick_market(pick, pick.Event, pick.Participants, values[5].strip().split(":")[1].strip())
+            self.set_pick_market(pick, pick.Participants, values[5].strip().split(":")[1].strip())
             pick.MinOdds = float(values[6].split(":")[1].strip())
+            pick.MessageId = self.UID
             message_picks.append(pick)
-        #     TODO : indicar la MessageID en el pick
 
         return message_picks
 
     @staticmethod
-    def set_pick_market(pick : Pick, event : str, participants : list, message_bet_string : str):
+    def set_pick_market(pick : Pick, participants : list, message_bet_string : str):
         if message_bet_string in participants or " draw" in message_bet_string.lower() or " empate" in message_bet_string.lower():
             pick.Bet["market"] = "1X2"
             if " draw" in message_bet_string.lower():
@@ -61,12 +61,8 @@ class GmailMessage():
         elif "+" in message_bet_string.lower() or "-" in message_bet_string.lower():
             pick.Bet["market"] = "AH"
 
-        #"password": "google8ARE#smbot"
-
     def __str__(self):
-        return self.Body
+        return self.MessageHtml
     
 
-
-
-    # Scrapping picks
+#"password": "google8ARE#smbot"
