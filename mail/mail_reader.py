@@ -39,8 +39,6 @@ class MailReader:
         self.Connection = imaplib.IMAP4_SSL("imap.gmail.com")
         self.Connection.login(self.Email, self.Password)
 
-
-
     # Reading messages
     def get_most_recent_message_id(self):
         ids = self.get_current_message_ids()
