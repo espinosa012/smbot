@@ -1,6 +1,5 @@
 from bettingbot.sportmarket.SMBot import SMBot
 from mail.mail_reader import MailReader
-from pick.pick import Pick
 
 if __name__ == "__main__":
     
@@ -13,7 +12,6 @@ if __name__ == "__main__":
     # pick.Stake = 1
     #
     # bot.place_bet(bot.users[1], pick)
-
     reader = MailReader()
     reader.connect()
     reader.watch()

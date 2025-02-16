@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from pick.pick import Pick
+from entity.pick import Pick
 
 
 class GmailMessage:
@@ -8,9 +8,9 @@ class GmailMessage:
     MessageObj = None
 
     Subject : str
-    From : str 
-    To : str 
-    Date : str 
+    From : str
+    To : str
+    Date : str
     UID : int
     MessageHtml : str
 
@@ -27,7 +27,8 @@ class GmailMessage:
         self.set_message_html()
 
     def set_message_html(self) -> None:
-        self.MessageHtml = str(self.MessageObj.get_payload()[1])
+        self.MessageHtml = str(self.MessageObj.get_payload())
+        # self.MessageHtml = str(self.MessageObj.get_payload()[1])
 
     # TODO: llevar fuera de aquí
     def get_picks_from_message(self) -> list:
@@ -48,21 +49,29 @@ class GmailMessage:
 
     @staticmethod
     def set_pick_market(pick : Pick, participants : list, message_bet_string : str):
-        if message_bet_string in participants or " draw" in message_bet_string.lower() or " empate" in message_bet_string.lower():
+        if message_bet_string in participants or "empate" in message_bet_string.lower():
             pick.Bet["market"] = "1X2"
-            if " draw" in message_bet_string.lower():
+            if "empate" in message_bet_string.lower():
                 pick.Bet["selection"] = "D"
             elif participants.index(message_bet_string) == 0:
                 pick.Bet["selection"] = "H"
             else:
                 pick.Bet["selection"] = "A"
-        elif "over " in message_bet_string.lower() or "under " in message_bet_string.lower():
-            pick.Bet["market"] = "TG"
         elif "+" in message_bet_string.lower() or "-" in message_bet_string.lower():
             pick.Bet["market"] = "AH"
+        elif ("m=e1s " in message_bet_string.lower() or "menos " in message_bet_string.lower()) and " goles" in message_bet_string.lower():
+            pick.Bet["market"] = "TG"
+            if "m=e1s " in message_bet_string.lower():
+                pick.Bet["selection"] = f"OVER {message_bet_string.lower().replace("m=e1s ", "")
+                    .replace(" goles", "").strip()}"
+            elif "menos " in message_bet_string.lower():
+                pick.Bet["selection"] = f"UNDER {message_bet_string.lower().replace("menos ", "")
+                    .replace(" goles", "").strip()}"
+
+
 
     def __str__(self):
         return self.MessageHtml
-    
+
 
 #"password": "google8ARE#smbot"

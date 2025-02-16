@@ -1,0 +1,8 @@
+los nombres de los participants no vienen exactamente igual en el mail que en la web, hay que cambiar la manera de:
+    1.  buscar los eventos: introducir estratégicamente los nombres de los participants para dar con el resultado correcto
+        por ejemplo, introducir el nombre del local y ver si hay alguno con una coincidencia muy grande. si lo hay, decidir en función de la coincidencia del visitante
+    2.  seleccionar el tr de evento favorito: a partir de nuestros particiapnts y la búsqueda que realicemos, tenemos que obtener los
+        verdaderos nombres de los participants
+
+una apuesta representa la llegada de un correo y está formada por un usuario (name y password), la lista de picks que
+vamos a colocar en el login y el stake (plano o no)

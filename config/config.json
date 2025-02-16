@@ -11,10 +11,8 @@
         "app_password": "yjts ecqp sgqg aotr"
     },
 
-    "redis" : {
-        "host": "192.168.1.132",
-        "port" : 6379,
-        "db" : 0
+    "server" : {
+        "address": "http://127.0.0.1:5000"
     }
 
 }

@@ -3,8 +3,9 @@ import json
 import time
 
 import bettingbot.selenium_utilities as _selenium
-import bettingbot.sportmarket.sm_utilities as sm 
-from pick.pick import Pick
+import bettingbot.sportmarket.sm_utilities as sm
+from entity.bet import Bet
+from entity.pick import Pick
 
 class SMBot:
 
@@ -27,7 +28,13 @@ class SMBot:
     def load_driver(self):
         self.driver = _selenium.get_driver()
 
+    def quit(self):
+        self.driver.close()
+
     # SportMarket/Betinasia black
+    def place_bet(self, bet: Bet) -> None:
+        pass
+
     def place_bet(self, user : dict, pick : Pick) -> None:
         self.driver.get(user["url"])
         # iniciar sesión
@@ -39,5 +46,5 @@ class SMBot:
         if sm.check_odds(self.driver, pick.Event, pick.MinOdds, pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
             sm.place_bet(self.driver, pick.Event, pick.Bet, pick.Stake)
         # eliminar de favoritos (opcional)
-        sm.remove_event_from_favourites(self.driver, pick.Event)
-        time.sleep(3)
+        # sm.remove_event_from_favourites(self.driver, pick.Event)
+        # time.sleep(3)

@@ -1,6 +1,7 @@
-redis
+flask
 setuptools
 selenium
 undetected-chromedriver
 bs4
 pyautogui
+thefuzz

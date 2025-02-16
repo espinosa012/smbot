@@ -32,7 +32,7 @@ def search_event_in_search_modal(driver: uc.Chrome, event: str) -> None:
     sel_util.wait_element_visible(driver, pom.SEARCH_BAR_INPUT)
     sel_util.wait_element_clickable(driver, pom.SEARCH_BAR_INPUT)
     pagui.random_wait(0.2, 0.45)
-    sel_util.selenium_send_keys(driver, pom.SEARCH_BAR_INPUT, event)
+    sel_util.selenium_send_keys(driver, pom.SEARCH_BAR_INPUT, event.replace(" - ", " "))    # TODO: sin guiones
     pagui.random_wait(0.8, 1.2)
     # clic en la tarjeta con el resultado deseado
     select_search_result(driver, event)
@@ -108,9 +108,10 @@ def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : 
         if bet["selection"] == "A":
                 return event_row_xpath + pom.EVENT_SELECTION_1X2_AWAY_TD
     if bet["market"] in ["TG", "Total Goals", "Total goals"]:
-        if bet["selection"] == "OVER":
+        if "OVER" in bet["selection"]:
+            # TODO: check value
             return event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_OVER_TD
-        if bet["selection"] == "UNDER":
+        if "UNDER" in bet["selection"]:
             return event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_UNDER_TD
     if bet["market"] in ["AH", "Asian Handicap"]:
         if bet["selection"] == "H":
