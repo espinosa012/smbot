@@ -1,7 +1,6 @@
 import json
 
 from flask import Flask, request
-import pickle
 
 from bettingbot.sportmarket.SMBot import SMBot
 from entity.pick import Pick

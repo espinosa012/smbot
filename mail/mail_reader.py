@@ -1,13 +1,12 @@
-import pickle
-import time
-import json
-import imaplib
 import email
-from http.client import responses
-
+import imaplib
+import json
+import time
 import requests
-from mail.gmail_message import GmailMessage
+
+from pick import pick_factory
 from entity.pick import Pick
+from mail.gmail_message import GmailMessage
 
 
 class MailReader:
@@ -86,16 +85,18 @@ class MailReader:
             msg_obj = self.get_message_by_id(_id)
             if msg_obj and self.is_pick_message(msg_obj):
                 # si es un mensaje de pick, formamos la lista de objetos picks
-                for mp in GmailMessage(msg_obj).get_picks_from_message():
+                for mp in pick_factory.get_betaminic_picks_from_message(GmailMessage(msg_obj)):
                     # TODO: lo guardamos en la base de datos y emitimos con redis un mensaje con la id que tiene en db
                     # TODO: hay que paralelizar esto
                     self.emit_pick(mp)
 
     def emit_pick(self, pick: Pick):
-        # TODO: con requests, enviar los picks por http al server flask
-        response = requests.post(f"{self.get_server_address()}/place-pick", data=json.dumps(pick.to_dict()),
-                      headers={'Content-Type': 'application/json'})
-        print(response)
+        try:
+            response = requests.post(f"{self.get_server_address()}/place-pick", data=json.dumps(pick.to_dict()),
+                          headers={'Content-Type': 'application/json'})
+            print(response)
+        except requests.exceptions.ConnectionError as conn_err:
+            print(conn_err) # TODO: al logger y gestionar bien
 
     @staticmethod
     def is_pick_message(msg: email.message.Message):

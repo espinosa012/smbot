@@ -1,5 +1,4 @@
-from user import User
-from pick import Pick
+from entity.user import User
 
 class Bet:
     PickList : list

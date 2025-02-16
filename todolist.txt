@@ -6,3 +6,7 @@ los nombres de los participants no vienen exactamente igual en el mail que en la
 
 una apuesta representa la llegada de un correo y está formada por un usuario (name y password), la lista de picks que
 vamos a colocar en el login y el stake (plano o no)
+
+ordenar las ids para procesarlas en el orden en que han llegado o el inverso, pero tenerlo claro
+
+una base de datos o similar para saber qué picks ha colocado cada usuario
