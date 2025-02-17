@@ -4,6 +4,8 @@ import bettingbot.pagui.pyautogui_utilities as pagui
 import bettingbot.selenium_utilities as sel_util
 import bettingbot.sportmarket.pageobject as pom
 
+# TODO: loggers por todos lados
+
 def login(driver: uc.Chrome, username: str, password: str) -> None:
     sel_util.wait_element_clickable(driver, pom.LOGIN_BUTTON)
     sel_util.selenium_send_keys(driver, pom.LOGIN_USERNAME, username)
@@ -99,7 +101,8 @@ def get_odds(driver: uc.Chrome, event: str, bet: dict) -> float:
     return 0    # TODO: informar por logger
 
 def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : dict) -> str | None:
-    event_row_xpath: str = get_favourite_event_row_xpath(driver, event)
+    # event_row_xpath: str = get_favourite_event_row_xpath(driver, event)
+    event_row_xpath: str = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR  # TODO: cuidado
     if bet["market"] in ["1X2", "1x2"]:
         if bet["selection"] == "H":
                 return event_row_xpath + pom.EVENT_SELECTION_1X2_HOME_TD
@@ -131,6 +134,11 @@ def get_favourite_event_row_xpath(driver : uc.Chrome, event : str) -> str:
                 return f"{event_row_xpath}[{event_rows.index(elem) + 1}]"
     return ""   # TODO: generar excepcion
 
-def remove_event_from_favourites(driver : uc.Chrome, event : str) -> None:
-    sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, event) + pom.FAVOURITE_EVENT_ICON)
-    sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, event))
+def remove_event_from_favourites(driver : uc.Chrome, event : str, retry : bool = False) -> None:
+    try:
+        sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, event) + pom.FAVOURITE_EVENT_ICON)
+        sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, event))
+    except Exception as e:
+        if retry:   remove_event_from_favourites(driver, event, False)
+        else: print(f"Error removing favourite event after retrying: {e}")
+

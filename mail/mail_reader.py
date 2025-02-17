@@ -4,6 +4,7 @@ import json
 import time
 import requests
 
+from entity.bet import Bet
 from pick import pick_factory
 from entity.pick import Pick
 from mail.gmail_message import GmailMessage
@@ -63,10 +64,10 @@ class MailReader:
 
     def watch(self):
         self.IsWatching = True
+        processed_ids: list = []  # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
         while self.IsWatching:
             self.Connection.select(self.MailBox)
             # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
-            processed_ids: list = []  # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
             # obtenemos la lista de ids a procesar, que serán las que estén en la bandeja de entrada y no en processed_ids
             new_messages_ids: list = self.get_new_messages_ids(processed_ids)
             # procesamos las ids no procesadas y lanzamos los picks, con redis o lo que sea.
@@ -76,6 +77,7 @@ class MailReader:
     def get_new_messages_ids(self, already_processed_ids: list):
         new_messages_ids: list = list(set(self.get_current_message_ids()) - set(already_processed_ids))
         if new_messages_ids:
+            new_messages_ids.sort()
             pass  # TODO: indicar en logger la llegada de nuevos mensajes
         return new_messages_ids
 
@@ -85,10 +87,21 @@ class MailReader:
             msg_obj = self.get_message_by_id(_id)
             if msg_obj and self.is_pick_message(msg_obj):
                 # si es un mensaje de pick, formamos la lista de objetos picks
-                for mp in pick_factory.get_betaminic_picks_from_message(GmailMessage(msg_obj)):
+                message_picks : list = pick_factory.get_betaminic_picks_from_message(GmailMessage(msg_obj))
+                self.emit_bet(Bet(message_picks, None, None))
+                # for mp in message_picks:
                     # TODO: lo guardamos en la base de datos y emitimos con redis un mensaje con la id que tiene en db
                     # TODO: hay que paralelizar esto
-                    self.emit_pick(mp)
+                    # self.emit_pick(mp)
+                    # tODO: crear emit_bet con el formato de apuesta
+
+    def emit_bet(self, bet : Bet):
+        try:
+            response = requests.post(f"{self.get_server_address()}/place-bet", data=json.dumps(bet.to_dict()),
+                                     headers={'Content-Type': 'application/json'})
+            print(response)
+        except requests.exceptions.ConnectionError as conn_err:
+            print(conn_err)  # TODO: al logger y gestionar bien
 
     def emit_pick(self, pick: Pick):
         try:

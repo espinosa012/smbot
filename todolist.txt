@@ -10,3 +10,8 @@ vamos a colocar en el login y el stake (plano o no)
 ordenar las ids para procesarlas en el orden en que han llegado o el inverso, pero tenerlo claro
 
 una base de datos o similar para saber qué picks ha colocado cada usuario
+
+importante, para colocar listas de picks, tener muy claro cuando la apuesta se ha efectuado (o no, pero pasamos a la siguiente),
+antes de reiniciar el bucle de colocación (que empieza dando click en la lupa)
+
+es importante quitar el evento de favoritos, reintentando si hace falta

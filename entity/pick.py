@@ -11,15 +11,15 @@ class Pick:
     BetaminicStrategy : str
     MessageId : int
 
-    def __init__(self, json_pick : dict = None):
-        self.Date = json_pick["Date"] if json_pick else ""
-        self.Event = json_pick["Event"] if json_pick else ""
-        self.Participants = json_pick["Participants"] if json_pick else []
-        self.Bet = json_pick["Bet"] if json_pick else {"market":"", "selection":""}
-        self.MinOdds = json_pick["MinOdds"] if json_pick else 0
-        self.Stake = json_pick["Stake"] if json_pick else 0
-        self.BetaminicStrategy = json_pick["BetaminicStrategy"] if json_pick else ""
-        self.MessageId = json_pick["MessageId"] if json_pick else -1
+    def __init__(self, pick_dict : dict = None):
+        self.Date = pick_dict["Date"] if pick_dict else ""
+        self.Event = pick_dict["Event"] if pick_dict else ""
+        self.Participants = pick_dict["Participants"] if pick_dict else []
+        self.Bet = pick_dict["Bet"] if pick_dict else {"market": "", "selection": ""}
+        self.MinOdds = pick_dict["MinOdds"] if pick_dict else 0
+        self.Stake = pick_dict["Stake"] if pick_dict else 0
+        self.BetaminicStrategy = pick_dict["BetaminicStrategy"] if pick_dict else ""
+        self.MessageId = pick_dict["MessageId"] if pick_dict else -1
 
     def from_betaminic(message_body : str):
         # TODO
