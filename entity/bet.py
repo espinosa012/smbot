@@ -11,8 +11,11 @@ class Bet:
         self.Stake = stake
 
     def to_dict(self):
+        pick_list = []
+        for p in self.PickList:
+            pick_list.append(p.to_dict())
         return {
-            "PickList":self.PickList,
+            "PickList":pick_list,
             "User": self.User.to_dict() if self.User else "",
             "Stake": self.Stake if self.Stake else -1
         }

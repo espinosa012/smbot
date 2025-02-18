@@ -14,7 +14,7 @@ app = Flask(__name__)
 def index():
     return '¡Hola, mundo!'
 
-@app.route('/place-pick', methods=['POST'])
+@app.route('/place-bet', methods=['POST'])
 def place_bet():
     bet = json.loads(request.data)
     return str(bet)
@@ -24,14 +24,14 @@ def place_bet():
 def place_pick():
     pick: Pick = Pick(pick_dict=json.loads(request.data))
     bot = SMBot()
-    pick.Stake = 1
+    pick.Stake = 2
     users = get_config_users()
 
     juamvu = users[0]
     espinosa024 = users[1]
-
+    print(f"Placing pick:{pick}")
     try:
-        test_user = espinosa024
+        test_user = juamvu
         bot.place_pick(test_user, pick)
     except Exception as e:
         print(e)

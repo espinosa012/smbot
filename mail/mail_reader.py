@@ -64,7 +64,9 @@ class MailReader:
 
     def watch(self):
         self.IsWatching = True
-        processed_ids: list = []  # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
+        # processed_ids: list = []  # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
+        self.Connection.select(self.MailBox)
+        processed_ids: list = self.get_current_message_ids()
         while self.IsWatching:
             self.Connection.select(self.MailBox)
             # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
@@ -88,11 +90,11 @@ class MailReader:
             if msg_obj and self.is_pick_message(msg_obj):
                 # si es un mensaje de pick, formamos la lista de objetos picks
                 message_picks : list = pick_factory.get_betaminic_picks_from_message(GmailMessage(msg_obj))
-                self.emit_bet(Bet(message_picks, None, None))
-                # for mp in message_picks:
+                # self.emit_bet(Bet(message_picks, None, None))
+                for mp in message_picks:
                     # TODO: lo guardamos en la base de datos y emitimos con redis un mensaje con la id que tiene en db
                     # TODO: hay que paralelizar esto
-                    # self.emit_pick(mp)
+                    self.emit_pick(mp)
                     # tODO: crear emit_bet con el formato de apuesta
 
     def emit_bet(self, bet : Bet):
