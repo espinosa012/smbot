@@ -18,7 +18,7 @@ class MailReader:
     MailBox: str  # "INBOX", ...
     CredentialsFilePath: str
     SleepTime: int
-    IsWatching: bool
+    IsWatching: bool = False
 
     def __init__(self, _filter: str = "ALL", mail_box: str = "INBOX", sleep_time: int = 5):
         self.Email, self.Password = self.get_credentials()
@@ -103,6 +103,7 @@ class MailReader:
     def process_pick(self, pick: Pick):
         """ Procesa un pick individual (almacenamiento, notificación, emisión...) """
         # TODO: enviar al endpoint de procesado de picks
+        print(f"Incoming pick: {pick.Event}, {pick.Bet["Market"]}-{pick.Bet["Selection"]}")  # TODO: al logger
         try:
             requests.post(f"{self.get_server_address()}/process-pick", data=json.dumps(pick.to_dict()),
                           headers={'Content-Type': 'application/json'})

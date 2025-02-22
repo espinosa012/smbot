@@ -1,13 +1,16 @@
 import json
 import os
 import pickle
+import threading
 
 from flask import Flask, request, redirect
 
 from bettingbot.sportmarket.SMBot import SMBot
+from entity.bet.bet import Bet
 from entity.pick.pick import Pick
 from entity.user import User
-from db.mongo_helper import insert_pick
+import db.mongo_helper as db
+from mail.mail_reader import MailReader
 
 app = Flask(__name__)
 
@@ -15,6 +18,15 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return 'BetSheet Home'
+
+@app.route('/watch', methods=['GET'])
+def watch():
+    reader = MailReader()
+    reader.connect()
+    if not reader.IsWatching:
+        print("Watching inbox...")  # TODO: al logger
+        threading.Thread(target=reader.watch, args=([True])).start()
+    return "ok"
 
 @app.route('/log', methods=['POST'])
 def log():
@@ -29,12 +41,16 @@ def logs():
 
 @app.route('/process-pick', methods=['POST'])
 def process_pick():
+    pick : Pick = get_request_pick(request)
     # TODO: lo guardamos en la base de datos o lo que sea que tengamos
-    insert_pick(get_request_pick(request))
+    db.insert_pick(pick)
     # TODO: notificamos la llegada de un nuevo pick
     pass
-    # Lo enviamos al endpoint correspondiente para la colocación
-    # redirect("/place-bet")
+    # TODO: para cada usuario activo, enviamos una peticion a place_bet.
+    # comprobar si se puede lanzar en paralelo
+    for user in db.get_active_users():
+        bet : Bet = Bet(pick, user, user["default_stake"])
+        # redirect("/place-bet")
     return "ok"
 
 @app.route('/place-bet', methods=['POST'])
@@ -58,8 +74,6 @@ def place_pick():
         bot.place_pick(test_user, pick, stake)
     except Exception as e:
         print(e)
-        bot.quit()
-    bot.quit()
     return f"Placing pick:{pick}"
 
 
