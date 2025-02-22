@@ -34,7 +34,7 @@ class SMBot:
         pass
 
     # TODO: usar nuestra entidad usuario (o usaurio Sportmarket)
-    def place_pick(self, user: User, pick: Pick) -> None:
+    def place_pick(self, user: User, pick: Pick, stake : float) -> None:
         self.driver.get(user.Url)
         # iniciar sesión
         sm.login(self.driver, user.Username, user.Password)
@@ -44,7 +44,7 @@ class SMBot:
         # comprobar la cuota y apostar si procede
         if sm.check_odds(self.driver, pick.Event, pick.MinOdds,
                          pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
-            sm.place_bet(self.driver, pick.Event, pick.Bet, pick.Stake)
+            sm.place_bet(self.driver, pick.Event, pick.Bet, stake)
         # eliminar de favoritos (opcional)
         sm.remove_event_from_favourites(self.driver, pick.Event, True)  # si falla lo reintentamos
-        time.sleep(1.5)
+        time.sleep(1)

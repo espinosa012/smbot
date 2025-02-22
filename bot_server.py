@@ -45,16 +45,17 @@ def place_bet():
 # TODO: cambiar nombre del endpoint
 @app.route('/place-pick', methods=['POST'])
 def place_pick():
-    pick: Pick = get_request_pick()
+    pick: Pick = get_request_pick(request)
     bot = SMBot()
-    pick.Stake = 2
+    stake = 2
     users = get_config_users()
     juamvu = users[0]
     espinosa024 = users[1]
+
     print(f"Placing pick:{pick}")
     try:
         test_user = espinosa024
-        bot.place_pick(test_user, pick)
+        bot.place_pick(test_user, pick, stake)
     except Exception as e:
         print(e)
         bot.quit()

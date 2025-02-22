@@ -24,23 +24,23 @@ def get_betaminic_picks_from_message(message : GmailMessage) -> list:
 
 def set_betaminic_pick_market(pick: Pick, participants: list, message_bet_string: str):
     if message_bet_string in participants or "empate" in message_bet_string.lower():
-        pick.Bet["market"] = "1X2"
+        pick.Bet["Market"] = "1X2"
         if "empate" in message_bet_string.lower():
-            pick.Bet["selection"] = "D"
+            pick.Bet["Selection"] = "D"
         elif participants.index(message_bet_string) == 0:
-            pick.Bet["selection"] = "H"
+            pick.Bet["Selection"] = "H"
         else:
-            pick.Bet["selection"] = "A"
+            pick.Bet["Selection"] = "A"
     elif "+" in message_bet_string.lower() or "-" in message_bet_string.lower():
-        pick.Bet["market"] = "AH"
+        pick.Bet["Market"] = "AH"
     elif (
             "m=e1s " in message_bet_string.lower() or "menos " in message_bet_string.lower()) and " goles" in message_bet_string.lower():
-        pick.Bet["market"] = "TG"
+        pick.Bet["Market"] = "TG"
         if "m=e1s " in message_bet_string.lower():
-            pick.Bet["selection"] = f"OVER {message_bet_string.lower().replace("m=e1s ", "")
+            pick.Bet["Selection"] = f"OVER {message_bet_string.lower().replace("m=e1s ", "")
             .replace(" goles", "").strip()}"
         elif "menos " in message_bet_string.lower():
-            pick.Bet["selection"] = f"UNDER {message_bet_string.lower().replace("menos ", "")
+            pick.Bet["Selection"] = f"UNDER {message_bet_string.lower().replace("menos ", "")
             .replace(" goles", "").strip()}"
 
 def get_betaminic_strategy(message_subject : str):
