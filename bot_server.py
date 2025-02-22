@@ -7,6 +7,7 @@ from flask import Flask, request, redirect
 from bettingbot.sportmarket.SMBot import SMBot
 from entity.pick.pick import Pick
 from entity.user import User
+from db.mongo_helper import insert_pick
 
 app = Flask(__name__)
 
@@ -29,8 +30,7 @@ def logs():
 @app.route('/process-pick', methods=['POST'])
 def process_pick():
     # TODO: lo guardamos en la base de datos o lo que sea que tengamos
-    get_request_pick(request).save_to_csv()
-    # print(json.loads(request.data))
+    insert_pick(get_request_pick(request))
     # TODO: notificamos la llegada de un nuevo pick
     pass
     # Lo enviamos al endpoint correspondiente para la colocación

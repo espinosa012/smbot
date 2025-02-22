@@ -1,9 +1,10 @@
 import undetected_chromedriver as uc
 
-import bettingbot.pagui.pyautogui_utilities as pagui
 import bettingbot.selenium_utilities as sel_util
 import bettingbot.sportmarket.pageobject as pom
 
+import random
+import time
 # TODO: loggers por todos lados
 
 def login(driver: uc.Chrome, username: str, password: str) -> None:
@@ -12,7 +13,7 @@ def login(driver: uc.Chrome, username: str, password: str) -> None:
     sel_util.selenium_send_keys(driver, pom.LOGIN_PASSWORD, password)
     sel_util.selenium_click(driver, pom.LOGIN_BUTTON)
     sel_util.wait_element_clickable(driver, pom.SEARCH_BUTTON, 20)
-    pagui.random_wait(0.5, 1)
+    time.sleep(random.uniform(0.5, 1))  # TODO: llevar esto y todos los que hay a selenium_utilities
 
 # SEARCHING EVENT
 def set_favourite_event(driver: uc.Chrome, event: str) -> bool:  # true si lo encuentra, false si no
@@ -22,31 +23,30 @@ def set_favourite_event(driver: uc.Chrome, event: str) -> bool:  # true si lo en
 
 def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
     sel_util.wait_element_clickable(driver, pom.SEARCH_BUTTON, 20)
-    pagui.random_wait(1, 2)
+    time.sleep(random.uniform(1, 2))
     sel_util.selenium_click(driver, pom.SEARCH_BUTTON)
     sel_util.wait_element_visible(driver, pom.SEARCH_MODAL_DIV)
     search_modal = sel_util.find_element_by_xpath(driver, pom.SEARCH_MODAL_DIV)
     if retry and (not search_modal or not search_modal.is_displayed()):
         open_search_modal(driver, False)
-    pagui.random_wait(1.3, 2)
+    time.sleep(random.uniform(1.3, 2))
 
 def search_event_in_search_modal(driver: uc.Chrome, event: str) -> None:
     sel_util.wait_element_visible(driver, pom.SEARCH_BAR_INPUT)
     sel_util.wait_element_clickable(driver, pom.SEARCH_BAR_INPUT)
-    pagui.random_wait(0.2, 0.45)
+    time.sleep(random.uniform(0.2, 0.45))
     sel_util.selenium_send_keys(driver, pom.SEARCH_BAR_INPUT, event.replace(" - ", " "))    # TODO: sin guiones
-    pagui.random_wait(0.8, 1.2)
+    time.sleep(random.uniform(0.8, 1.2))
     # clic en la tarjeta con el resultado deseado
     select_search_result(driver, event)
-    pagui.random_wait(0.5, 1.2)
+    time.sleep(random.uniform(0.5, 1.2))
 
 def select_search_result(driver: uc.Chrome, event: str) -> None:
     # TODO: se puede mejorar. No hacer clic en la primera tarjeta, buscar la tarjeta según el contenido del string event
     sel_util.selenium_click(driver, pom.SEARCH_RESULT_CARD)
     # esperamos que se oculte el modal y una cantidad aleatoria de tiempo, o que sea clickable el botón de la cuota
     sel_util.wait_element_invisible(driver, pom.SEARCH_MODAL_DIV, 3)
-    pagui.random_wait(0.4, 0.7)
-
+    time.sleep(random.uniform(0.4, 0.7))
 
 # MARKETS
 def place_bet(driver : uc.Chrome, event : str, bet : dict, stake : float):
@@ -68,18 +68,18 @@ def click_best_odds(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
     # TODO: me falta entenderlo bien, la cuota máxima puede estar limitada por el stake
     sel_util.selenium_click(driver, pom.PLACER_MODAL_DIV + pom.BEST_ODDS_SPAN)
-    pagui.random_wait(0.3, 0.6)
+    time.sleep(random.uniform(0.3, 0.6))
 
 def place_stake(driver : uc.Chrome, stake : float):
     sel_util.selenium_clear_input(driver, pom.STAKE_INPUT)
-    pagui.random_wait(0.3, 0.9)
+    time.sleep(random.uniform(0.3, 0.9))
     sel_util.selenium_send_keys(driver, pom.STAKE_INPUT, str(stake))
-    pagui.random_wait(0.7, 1)
+    time.sleep(random.uniform(0.7, 1))
     sel_util.selenium_click(driver, pom.PLACER_MODAL_DIV + pom.PLACE_BET_BUTTON)
 
 def confirm_bet_placing(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACE_CONFIRMATION_MODAL_DIV)
-    pagui.random_wait(0.3, 0.6)
+    time.sleep(random.uniform(0.3, 0.6))
     sel_util.selenium_click(driver, pom.PLACE_CONFIRMATION_MODAL_DIV + pom.PLACE_CONFIRMATION_MODAL_FOOTER_DIV
                             + pom.CONFIRM_PLACE_BUTTON)
     sel_util.wait_element_invisible(driver, pom.PLACE_CONFIRMATION_MODAL_DIV)
