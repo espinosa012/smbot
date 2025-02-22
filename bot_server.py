@@ -2,10 +2,10 @@ import json
 import os
 import pickle
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 
 from bettingbot.sportmarket.SMBot import SMBot
-from entity.pick import Pick
+from entity.pick.pick import Pick
 from entity.user import User
 
 app = Flask(__name__)
@@ -13,12 +13,29 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return '¡Hola, mundo!'
+    return 'BetSheet Home'
 
 @app.route('/log', methods=['POST'])
 def log():
+    # TODO: usar un logger propio
     message : str = pickle.loads(request.data)
     return str(message)
+
+@app.route('/logs', methods=['GET'])
+def logs():
+    # TODO: para mostrar los mensajes de logs
+    pass
+
+@app.route('/process-pick', methods=['POST'])
+def process_pick():
+    # TODO: lo guardamos en la base de datos o lo que sea que tengamos
+    get_request_pick(request).save_to_csv()
+    # print(json.loads(request.data))
+    # TODO: notificamos la llegada de un nuevo pick
+    pass
+    # Lo enviamos al endpoint correspondiente para la colocación
+    # redirect("/place-bet")
+    return "ok"
 
 @app.route('/place-bet', methods=['POST'])
 def place_bet():
@@ -28,16 +45,15 @@ def place_bet():
 # TODO: cambiar nombre del endpoint
 @app.route('/place-pick', methods=['POST'])
 def place_pick():
-    pick: Pick = Pick(pick_dict=json.loads(request.data))
+    pick: Pick = get_request_pick()
     bot = SMBot()
     pick.Stake = 2
     users = get_config_users()
-
     juamvu = users[0]
     espinosa024 = users[1]
     print(f"Placing pick:{pick}")
     try:
-        test_user = juamvu
+        test_user = espinosa024
         bot.place_pick(test_user, pick)
     except Exception as e:
         print(e)
@@ -45,6 +61,11 @@ def place_pick():
     bot.quit()
     return f"Placing pick:{pick}"
 
+
+# TODO: necesitamos un endpoint que reciba un pick y un usuario (o una Bet) y lo coloque. Así, quizás podamos
+#  paralelizar la colocación del pick, con un hilo para cada usuario
+def get_request_pick(req) -> Pick:
+    return Pick(pick_dict=json.loads(req.data))
 
 def get_config_users():
     users: list = []

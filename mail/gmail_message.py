@@ -1,7 +1,3 @@
-from bs4 import BeautifulSoup
-
-from entity.pick import Pick
-
 
 class GmailMessage:
 

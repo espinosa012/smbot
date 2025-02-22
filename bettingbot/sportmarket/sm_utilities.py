@@ -103,23 +103,23 @@ def get_odds(driver: uc.Chrome, event: str, bet: dict) -> float:
 def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : dict) -> str | None:
     # event_row_xpath: str = get_favourite_event_row_xpath(driver, event)
     event_row_xpath: str = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR  # TODO: cuidado
-    if bet["market"] in ["1X2", "1x2"]:
-        if bet["selection"] == "H":
+    if bet["Market"] in ["1X2", "1x2"]:
+        if bet["Selection"] == "H":
                 return event_row_xpath + pom.EVENT_SELECTION_1X2_HOME_TD
-        if bet["selection"] == "D":
+        if bet["Selection"] == "D":
                 return event_row_xpath + pom.EVENT_SELECTION_1X2_DRAW_TD
-        if bet["selection"] == "A":
+        if bet["Selection"] == "A":
                 return event_row_xpath + pom.EVENT_SELECTION_1X2_AWAY_TD
-    if bet["market"] in ["TG", "Total Goals", "Total goals"]:
-        if "OVER" in bet["selection"]:
+    if bet["Market"] in ["TG"]:
+        if "OVER" in bet["Selection"]:
             # TODO: check value
             return event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_OVER_TD
-        if "UNDER" in bet["selection"]:
+        if "UNDER" in bet["Selection"]:
             return event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_UNDER_TD
-    if bet["market"] in ["AH", "Asian Handicap"]:
-        if bet["selection"] == "H":
+    if bet["Market"] in ["AH"]:
+        if bet["Selection"] == "H":
                 return event_row_xpath + pom.EVENT_SELECTION_AH_HOME_TD
-        if bet["selection"] == "A":
+        if bet["Selection"] == "A":
                 return event_row_xpath + pom.EVENT_SELECTION_AH_AWAY_TD
     # TODO: enum de mercados y selections
     return ""

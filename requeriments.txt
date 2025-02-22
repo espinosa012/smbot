@@ -5,3 +5,4 @@ undetected-chromedriver
 bs4
 pyautogui
 thefuzz
+pandas

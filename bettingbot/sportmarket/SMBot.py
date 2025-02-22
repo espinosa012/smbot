@@ -1,7 +1,7 @@
 import bettingbot.selenium_utilities as _selenium
 import bettingbot.sportmarket.sm_utilities as sm
 from entity.bet import Bet
-from entity.pick import Pick
+from entity.pick.pick import Pick
 import time
 
 from entity.user import User

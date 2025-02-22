@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from entity.pick import Pick
+from entity.pick.pick import Pick
 from mail.gmail_message import GmailMessage
 
 
@@ -16,7 +16,7 @@ def get_betaminic_picks_from_message(message : GmailMessage) -> list:
         pick.Participants = [p.strip() for p in pick.Event.split(" - ")]
         set_betaminic_pick_market(pick, pick.Participants, values[5].strip().split(":")[1].strip())
         pick.MinOdds = float(values[6].split(":")[1].strip())
-        pick.MessageId = message.UID
+        pick.UID = message.UID
         pick.BetaminicStrategy = get_betaminic_strategy(message.Subject)
         message_picks.append(pick)
 
@@ -44,5 +44,5 @@ def set_betaminic_pick_market(pick: Pick, participants: list, message_bet_string
             .replace(" goles", "").strip()}"
 
 def get_betaminic_strategy(message_subject : str):
-    return message_subject.split(" Estrategia ")[1].replace('"', "").strip()
+    return message_subject.split(" Estrategia ")[1].replace('"', "").replace("\r\n" ,"").strip()
 
