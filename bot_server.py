@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 
 from flask import Flask, request
 
@@ -13,6 +14,11 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return '¡Hola, mundo!'
+
+@app.route('/log', methods=['POST'])
+def log():
+    message : str = pickle.loads(request.data)
+    return str(message)
 
 @app.route('/place-bet', methods=['POST'])
 def place_bet():

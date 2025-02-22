@@ -15,3 +15,5 @@ importante, para colocar listas de picks, tener muy claro cuando la apuesta se h
 antes de reiniciar el bucle de colocación (que empieza dando click en la lupa)
 
 es importante quitar el evento de favoritos, reintentando si hace falta
+
+ver bien que pasa cuando llega un mensaje que no es de pick

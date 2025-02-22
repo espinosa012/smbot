@@ -66,7 +66,8 @@ class MailReader:
         self.IsWatching = True
         # processed_ids: list = []  # TODO: quizás podríamos obtener las ids procesadas al arrancar consultando en db
         self.Connection.select(self.MailBox)
-        processed_ids: list = self.get_current_message_ids()
+        # processed_ids: list = self.get_current_message_ids()
+        processed_ids: list = []
         while self.IsWatching:
             self.Connection.select(self.MailBox)
             # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
@@ -115,4 +116,5 @@ class MailReader:
 
     @staticmethod
     def is_pick_message(msg: email.message.Message):
+        # TODO: usar from
         return "Picks" in msg["Subject"].strip()
