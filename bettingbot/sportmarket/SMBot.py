@@ -37,22 +37,18 @@ class SMBot:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
             betinasia.login(self.driver, bet.User.Username, bet.User.Password)
-            # TODO: cerrar el panel de Pedidos recientes
+            # cerrar el panel de Pedidos recientes
             betinasia.close_footer(self.driver)
-            pass
             # buscar el evento
             betinasia.search_event(self.driver, bet.Pick)
             # TODO: si no lo hemos encontrado (ratio minimo), lo indicamos en la Bet e interrumpimos la colocación
 
             # comprobar la cuota y apostar si procede
-            if betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames, bet.Pick.MinOdds,
-                                    bet.Pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
-                betinasia.place_bet(self.driver, bet.Pick.WebParticipantNames, bet.Pick.Bet, bet.Stake)
+            # if betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames, bet.Pick.MinOdds,bet.Pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
+            betinasia.place_bet(self.driver, bet)
             # TODO: obtener la cuota colocada, que está en la fila del evento en el panel Pedidos recientes, en la columna Precio
 
-
             # TODO: tenemos que determinar si se ha colocado correctamente, e indicarlo en el campo correspondiente de Bet.
-            # eliminar de favoritos (opcional)
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
             time.sleep(1)
         except Exception as e:

@@ -48,6 +48,7 @@ PLACE_BET_BUTTON = "//button[contains(@class, 'placeButton')]"
 BEST_ODDS_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][1]/descendant::span[contains(@class, '_price_')]"
 BEST_ODDS_MAX_STAKE_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][1]/descendant::span[contains(@class, '_stake_')]"
 BOOKIE_PRICE_ROW = "//div[contains(@class, 'bookieAccountPrices')]"
+PLACED_ODDS_INPUT = "//input[contains(@class, 'price-input')]"
 
 # Place confirmation modal
 PLACE_CONFIRMATION_MODAL_DIV = "//div[contains(@class, 'placeConfirmationModal')]"

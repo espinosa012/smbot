@@ -1,6 +1,5 @@
 import undetected_chromedriver as uc
-from undetected_chromedriver import WebElement
-
+from entity.bet.bet import Bet
 from entity.pick.pick import Pick
 from fuzz import fuzz_helper
 import bettingbot.selenium_utilities as sel_util
@@ -149,28 +148,18 @@ def compute_ratio(pick_participants : list, search_result_event_participants : l
                               + partial_ratio_factor * (home_partial_ratio + away_partial_ratio)/2)
     return min(100.0, computed_ratio)
 
-def get_most_likely_event_card_xpath(driver : uc.Chrome, participants : list) -> str:
-    """
-    Para obtener el resultado de búsqueda más parecido para el evento
-    :param driver: 
-    :param participants: 
-    :return: 
-    """
-    # TODO: obtenemos el ratio fuzz para cada tarjeta y devolvemos la más similar si supera cierto umbral, en caso contrario, None
-    most_likely_card_xpath : str = ""
-    for card in get_found_event_cards(driver):
-        pass
-    return most_likely_card_xpath
 
 # MARKETS
-def place_bet(driver : uc.Chrome, participants : list, bet : dict, stake : float):
+def place_bet(driver : uc.Chrome, bet : Bet):
     # clic en la cuota que corresponda
-    click_selection(driver, participants, bet)
+    click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
     # seleccionar la cuota
     click_best_odds(driver)
+    # tomar valor de la cuota colocada
+    bet.PlacedOdd = get_placed_odds(driver)
     # mandar stake y clic en apostar
-    place_stake(driver, stake)
-    # esperar que se muestre el modal de confirmación y click
+    place_stake(driver, bet.Stake)
+    # esperar que se muestre el modal de confirmación y clic
     confirm_bet_placing(driver)
     # cerrar el modal
     close_placer_modal(driver)
@@ -184,6 +173,11 @@ def click_best_odds(driver : uc.Chrome):
     sel_util.selenium_click(driver, pom.PLACER_MODAL_DIV + pom.BEST_ODDS_SPAN)
     time.sleep(random.uniform(0.3, 0.6))
 
+def get_placed_odds(driver : uc.Chrome):
+    sel_util.wait_element_clickable(driver, pom.PLACED_ODDS_INPUT)
+    sel_util.random_wait(0.1, 0.3)
+    return float(sel_util.find_element_by_xpath(driver, pom.PLACED_ODDS_INPUT).get_attribute("value"))
+
 def place_stake(driver : uc.Chrome, stake : float):
     sel_util.selenium_clear_input(driver, pom.STAKE_INPUT)
     time.sleep(random.uniform(0.3, 0.9))
@@ -196,7 +190,7 @@ def confirm_bet_placing(driver : uc.Chrome):
     time.sleep(random.uniform(0.3, 0.6))
     sel_util.selenium_click(driver, pom.PLACE_CONFIRMATION_MODAL_DIV + pom.PLACE_CONFIRMATION_MODAL_FOOTER_DIV
                             + pom.CONFIRM_PLACE_BUTTON)
-    sel_util.wait_element_invisible(driver, pom.PLACE_CONFIRMATION_MODAL_DIV)
+    sel_util.wait_element_invisible(driver, pom.PLACE_CONFIRMATION_MODAL_DIV, 3)
 
 def close_placer_modal(driver : uc.Chrome):
     sel_util.wait_element_clickable(driver, pom.PLACE_BET_BUTTON)
@@ -245,11 +239,12 @@ def get_favourite_event_row_xpath(driver : uc.Chrome, participants : list) -> st
         for elem in event_rows:
             if participants[0] in elem.text and participants[1] in elem.text:
                 return f"{event_row_xpath}[{event_rows.index(elem) + 1}]"
-    return ""   # TODO: generar excepcion
+    return ""   # TODO: generar excepción
 
 def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry : bool = False) -> None:
     try:
         sel_util.wait_element_clickable(driver, pom.FAVOURITE_EVENT_ICON, 5)
+        sel_util.random_wait(0.3, 0.8)
         sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, participants) + pom.FAVOURITE_EVENT_ICON)
         sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, participants))
         sel_util.wait_element_visible(driver, f"{pom.FAVOURITES_SECTION_TBODY}")
@@ -258,6 +253,7 @@ def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry 
         else: print(f"Error removing favourite event after retrying: {e}")
 
 def close_footer(driver : uc.Chrome):
+    # TODO: logger
     try:
         if not sel_util.is_element_present(driver, pom.EXPANDED_BET_BAR_FOOTER_DIV, 5):return
         sel_util.wait_element_clickable(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}{pom.TOGGLE_BET_BAR_FOOTER_BUTTON}")
