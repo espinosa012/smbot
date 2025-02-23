@@ -27,6 +27,7 @@ class SMBot:
 
     def quit(self):
         self.driver.close()
+        self.driver.quit()
 
     # SportMarket/Betinasia black
     def place_bet(self, bet: Bet, check_min_odds : bool = False) -> bool:
@@ -62,11 +63,11 @@ class SMBot:
             bet.IsPlaced = bet_placed_ok
 
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
-
             time.sleep(1)
+            return True
+
         except Exception as e:
             print(f"Exception placing pick {bet.Pick.Event} ({bet.Pick.Bet['Market']} - {bet.Pick.Bet['Selection']}): {e}")
             bet.IsPlaced = False
             bet.PlacingError = "Error placing bet"  # TODO: usar enum
             return False
-        return bet_placed_ok
