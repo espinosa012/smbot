@@ -2,8 +2,7 @@ from bettingbot.sportmarket.SMBot import SMBot
 from entity.bet.bet import Bet
 from entity.pick.pick import Pick
 from entity.user import User
-from mail.mail_reader import MailReader
-from fuzz import fuzz_helper
+
 
 def get_config_users():
     users: list = []
@@ -22,11 +21,11 @@ def get_config_users():
 
 bot = SMBot()
 pick = Pick()
-pick.Event = "Jong Ajax - Cambuur"
-pick.Participants  = ["Jong Ajax", "Cambuur"]
+pick.Event = "Plaza Colonia - Defensor Sp."
+pick.Participants  = ["Plaza Colonia", "Defensor Sp."]
 pick.Bet = {"Market":"1X2", "Selection":"H"}
 pick.MinOdds = 3.59
-bot.place_bet(Bet(pick, get_config_users()[0], 1))
+bot.place_bet(Bet(pick, get_config_users()[1], 1))
 
 
 

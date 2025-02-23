@@ -39,7 +39,9 @@ class SMBot:
             betinasia.login(self.driver, bet.User.Username, bet.User.Password)
             # buscar el evento
             # TODO: comprobar antes si ya está en favs
-            betinasia.set_favourite_event(self.driver, bet.Pick.Participants)
+            betinasia.search_event(self.driver, bet.Pick.Participants)
+            # TODO: si no lo hemos encontrado (ratio minimo), lo indicamos en la Bet e interrumpimos la colocación
+
             # comprobar la cuota y apostar si procede
             if betinasia.check_odds(self.driver, bet.Pick.Event, bet.Pick.MinOdds,
                                     bet.Pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
@@ -55,25 +57,4 @@ class SMBot:
         except Exception as e:
             print(f"Exception placing pick: {e}") # tODO: mejorar el mensaje y llevar a log
         time.sleep(2)
-        quit()
-
-    # TODO: se debe llamar place_bet y recibir una Bet para poner la cuota colocada
-    def place_pick(self, user: User, pick: Pick, stake : float) -> None:
-        self.driver.get(user.Url)
-        # iniciar sesión
-        betinasia.login(self.driver, user.Username, user.Password)
-        # buscar el evento
-        # TODO: comprobar antes si ya está en favs
-        betinasia.set_favourite_event(self.driver, pick.Event)
-        # comprobar la cuota y apostar si procede
-        if betinasia.check_odds(self.driver, pick.Event, pick.MinOdds,
-                                pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
-            betinasia.place_bet(self.driver, pick.Event, pick.Bet, stake)
-        # TODO: obtener la cuota colocada, que está en la fila del evento en el panel Pedidos recientes, en la columna Precio
-
-        # TODO: cerrar el panel de Pedidos recientes
-        pass
-        # eliminar de favoritos (opcional)
-        betinasia.remove_event_from_favourites(self.driver, pick.Event, True)  # si falla lo reintentamos
-        time.sleep(1)
         quit()

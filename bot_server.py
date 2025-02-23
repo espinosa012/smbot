@@ -29,11 +29,6 @@ def watch():
         threading.Thread(target=mail_reader.watch, args=([True])).start()
     return "ok"
 
-@app.route('/run-bot', methods=['GET'])
-def run_bot():
-    # TODO: arrancamos una instancia del SMBot
-    pass
-
 @app.route('/log', methods=['POST'])
 def log():
     # TODO: usar un logger propio
@@ -48,12 +43,10 @@ def logs():
 @app.route('/process-pick', methods=['POST'])
 def process_pick():
     pick : Pick = get_request_pick(request)
-    # TODO: lo guardamos en la base de datos o lo que sea que tengamos
+    # almacenamos el pick en la base de datos
     db.insert_pick(pick)
     # TODO: notificamos la llegada de un nuevo pick
     pass
-    # TODO: para cada usuario activo, enviamos una peticion a place_bet.
-    # comprobar si se puede lanzar en paralelo
     # for user in db.get_active_users():
     for user in get_config_users():
         bet : Bet = Bet(pick, user, 2)
@@ -63,25 +56,6 @@ def process_pick():
         # db.insert_bet(bet)    #TODO probar
 
     return "ok"
-
-# TODO: cambiar nombre del endpoint
-@app.route('/place-pick', methods=['POST'])
-def place_pick():
-    pick: Pick = get_request_pick(request)
-    bot = SMBot()
-    stake = 2
-    users = get_config_users()
-    juamvu = users[0]
-    espinosa024 = users[1]
-
-    print(f"Placing pick:{pick}")
-    try:
-        test_user = espinosa024
-        bot.place_pick(test_user, pick, stake)
-    except Exception as e:
-        print(e)
-    return f"Placing pick:{pick}"
-
 
 # TODO: necesitamos un endpoint que reciba un pick y un usuario (o una Bet) y lo coloque. Así, quizás podamos
 #  paralelizar la colocación del pick, con un hilo para cada usuario
