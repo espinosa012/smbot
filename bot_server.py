@@ -48,11 +48,10 @@ def process_pick():
     # TODO: notificamos la llegada de un nuevo pick
     pass
     # for user in db.get_active_users():
-    # for user in get_config_users():
-    for user in [get_config_users()[1]]:
+    # for user in [get_config_users()[1]]:
+    for user in get_config_users():
         bet : Bet = Bet(pick, user, 2)
-        # TODO: colocamos la apuesta para el usuario, y cuando termine, el siguiente usuario
-        print("Placing bet...") # TODO: al logger
+        print(f"Placing bet for user {user.Username}") # TODO: al logger
         bot = SMBot()
         bot.place_bet(bet)
         bot.quit()
