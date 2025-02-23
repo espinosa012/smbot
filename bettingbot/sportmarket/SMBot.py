@@ -55,7 +55,8 @@ class SMBot:
             bet.IsPlaced = bet_placed_ok
 
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
+
             time.sleep(1)
         except Exception as e:
-            print(f"Exception placing pick: {e}") # tODO: mejorar el mensaje y llevar a log
+            print(f"Error placing pick: {e}") # tODO: mejorar el mensaje y llevar a log
         return bet_placed_ok
