@@ -44,7 +44,7 @@ def logs():
 def process_pick():
     pick : Pick = get_request_pick(request)
     # almacenamos el pick en la base de datos
-    # db.insert_pick(pick)
+    db.insert_pick(pick)
     # TODO: notificamos la llegada de un nuevo pick
     pass
     # for user in db.get_active_users():
@@ -56,11 +56,8 @@ def process_pick():
         bot.place_bet(bet)
         bot.quit()
         db.insert_bet(bet)    #TODO probar
-
     return "ok"
 
-# TODO: necesitamos un endpoint que reciba un pick y un usuario (o una Bet) y lo coloque. Así, quizás podamos
-#  paralelizar la colocación del pick, con un hilo para cada usuario
 def get_request_pick(req) -> Pick:
     return Pick(pick_dict=json.loads(req.data))
 
