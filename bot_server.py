@@ -3,7 +3,7 @@ import os
 import pickle
 import threading
 
-from flask import Flask, request, redirect
+from flask import Flask, request
 
 from bettingbot.sportmarket.SMBot import SMBot
 from entity.bet.bet import Bet

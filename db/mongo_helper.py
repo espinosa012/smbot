@@ -23,13 +23,13 @@ def insert_pick(pick : Pick) -> None:
     # TODO: consideramos que está duplicado si tiene la misma UID, evento y bet
     try:
         pick_coll.insert_one(pick.to_dict())
-    except DuplicateKeyError as e:
+    except DuplicateKeyError:
         print(f"Clave duplicada ({pick.to_dict()["_id"]})")    # TODO: al logger
 
 def insert_bet(bet : Bet) -> None:
     try:
         bet_coll.insert_one(bet.to_dict())
-    except DuplicateKeyError as e:
+    except DuplicateKeyError:
         print(f"Clave duplicada ({bet.to_dict()["_id"]})")  # TODO: al logger
 
 def get_active_users() -> list:

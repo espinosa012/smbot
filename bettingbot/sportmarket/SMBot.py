@@ -1,10 +1,8 @@
-import bettingbot.selenium_utilities as _selenium
-import bettingbot.sportmarket.sm_utilities as betinasia # TODO: cambiar nombre del módulo a betinasia
-from entity.bet.bet import Bet
-from entity.pick.pick import Pick
 import time
 
-from entity.user import User
+import bettingbot.selenium_utilities as _selenium
+import bettingbot.sportmarket.sm_utilities as betinasia
+from entity.bet.bet import Bet
 
 
 class SMBot:
@@ -33,7 +31,6 @@ class SMBot:
     # SportMarket/Betinasia black
     def place_bet(self, bet: Bet, check_min_odds : bool = False) -> bool:
         # TODO: es importante gestionar las excepciones y afectar a los campos de Bet
-        bet_placed_ok: bool = False
         try:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
@@ -61,14 +58,14 @@ class SMBot:
                 bet.PlacingError = "Odds above minimum"  # TODO: usar enum
                 return False
 
-            bet_placed_ok = betinasia.place_bet(self.driver, bet)
+            bet_placed_ok : bool = betinasia.place_bet(self.driver, bet)
             bet.IsPlaced = bet_placed_ok
 
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
 
             time.sleep(1)
         except Exception as e:
-            print(f"Exception placing pick {bet.Pick.Event} ({bet.Pick.Bet['Market']} - {bet.Pick.Bet['Selection']})")
+            print(f"Exception placing pick {bet.Pick.Event} ({bet.Pick.Bet['Market']} - {bet.Pick.Bet['Selection']}): {e}")
             bet.IsPlaced = False
             bet.PlacingError = "Error placing bet"  # TODO: usar enum
             return False

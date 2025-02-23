@@ -28,7 +28,7 @@ def search_event(driver: uc.Chrome, pick : Pick) -> bool:  # true si lo encuentr
     ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, pick.Participants)
     minimum_ratio_for_searching_event: float = 70 # TODO a config
     if ratio < minimum_ratio_for_searching_event:
-        return False    # TODO: y ponemos en Bet el error EVENT_NOT_FOUND
+        return False
     click_best_search_result(driver, ratio, pick)
     return sel_util.is_element_present(driver, pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR)
 
