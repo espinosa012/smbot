@@ -55,7 +55,7 @@ def process_pick():
         bot = SMBot()
         bot.place_bet(bet)
         bot.quit()
-        # db.insert_bet(bet)    #TODO probar
+        db.insert_bet(bet)    #TODO probar
 
     return "ok"
 

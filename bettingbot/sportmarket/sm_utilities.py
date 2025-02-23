@@ -267,7 +267,7 @@ def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry 
 def close_footer(driver : uc.Chrome):
     # TODO: logger
     try:
-        if not sel_util.is_element_present(driver, pom.EXPANDED_BET_BAR_FOOTER_DIV, 5):return
+        if not sel_util.is_element_present(driver, pom.EXPANDED_BET_BAR_FOOTER_DIV, 3):return
         sel_util.wait_element_clickable(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}{pom.TOGGLE_BET_BAR_FOOTER_BUTTON}")
         sel_util.selenium_click(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}{pom.TOGGLE_BET_BAR_FOOTER_BUTTON}")
         sel_util.random_wait(0.1, 0.4)
