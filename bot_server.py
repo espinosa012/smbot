@@ -12,7 +12,8 @@ from entity.user import User
 import db.mongo_helper as db
 from mail.mail_reader import MailReader
 
-app = Flask(__name__)
+app : Flask = Flask(__name__)
+mail_reader : MailReader = MailReader()
 
 
 @app.route('/')
@@ -21,12 +22,17 @@ def index():
 
 @app.route('/watch', methods=['GET'])
 def watch():
-    reader = MailReader()
-    reader.connect()
-    if not reader.IsWatching:
+    mail_reader.connect()
+    print("Mail reader connected.")  # TODO: al logger
+    if not mail_reader.IsWatching:
         print("Watching inbox...")  # TODO: al logger
-        threading.Thread(target=reader.watch, args=([True])).start()
+        threading.Thread(target=mail_reader.watch, args=([True])).start()
     return "ok"
+
+@app.route('/run-bot', methods=['GET'])
+def run_bot():
+    # TODO: arrancamos una instancia del SMBot
+    pass
 
 @app.route('/log', methods=['POST'])
 def log():
@@ -48,15 +54,15 @@ def process_pick():
     pass
     # TODO: para cada usuario activo, enviamos una peticion a place_bet.
     # comprobar si se puede lanzar en paralelo
-    for user in db.get_active_users():
-        bet : Bet = Bet(pick, user, user["default_stake"])
-        # redirect("/place-bet")
-    return "ok"
+    # for user in db.get_active_users():
+    for user in get_config_users():
+        bet : Bet = Bet(pick, user, 2)
+        # TODO: colocamos la apuesta para el usuario, y cuando termine, el siguiente usuario
+        print("Placing bet...") # TODO: al logger
+        SMBot().place_bet(bet)
+        # db.insert_bet(bet)    #TODO probar
 
-@app.route('/place-bet', methods=['POST'])
-def place_bet():
-    bet = json.loads(request.data)
-    return str(bet)
+    return "ok"
 
 # TODO: cambiar nombre del endpoint
 @app.route('/place-pick', methods=['POST'])

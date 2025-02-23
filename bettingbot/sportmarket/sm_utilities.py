@@ -1,10 +1,13 @@
 import undetected_chromedriver as uc
+from undetected_chromedriver import WebElement
 
+from fuzz import fuzz_helper
 import bettingbot.selenium_utilities as sel_util
 import bettingbot.sportmarket.pageobject as pom
 
 import random
 import time
+
 # TODO: loggers por todos lados
 
 def login(driver: uc.Chrome, username: str, password: str) -> None:
@@ -16,9 +19,9 @@ def login(driver: uc.Chrome, username: str, password: str) -> None:
     time.sleep(random.uniform(0.5, 1))  # TODO: llevar esto y todos los que hay a selenium_utilities
 
 # SEARCHING EVENT
-def set_favourite_event(driver: uc.Chrome, event: str) -> bool:  # true si lo encuentra, false si no
+def set_favourite_event(driver: uc.Chrome, participants : list) -> bool:  # true si lo encuentra, false si no
     open_search_modal(driver, True) # con 1 reintento
-    search_event_in_search_modal(driver, event)
+    search_event_in_search_modal(driver, participants)
     return sel_util.is_element_present(driver, pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR)
 
 def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
@@ -31,22 +34,138 @@ def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
         open_search_modal(driver, False)
     time.sleep(random.uniform(1.3, 2))
 
-def search_event_in_search_modal(driver: uc.Chrome, event: str) -> None:
+def search_event_in_search_modal(driver: uc.Chrome, participants : list) -> None:
+    # 1. Introducimos los dos participants y comprobamos si es similar al primer resultado. En caso afirmativo, está encontrado.
+    event_max_ratio : float # calidad del mejor resultado obtenido introduciendo los dos
+    home_max_ratio : float  # calidad del mejor resultado obtenido introduciendo solo el home
+    away_max_ratio : float  # calidad del mejor resultado obtenido introduciendo solo el away
+    max_ratio : float  # calidad del mejor resultado obtenido introduciendo solo el away
+
+    # Buscamos con qué string obtenemos el mejor resultado
+    # TODO: igual se puede meter esto en un método
+    search_term(driver, str.join(" ", participants))
+    if no_results_found(driver): event_max_ratio = 0
+    else: event_max_ratio = get_search_result_most_likely_ratio(driver, participants)
+
+    search_term(driver, participants[0])
+    if no_results_found(driver):home_max_ratio = 0
+    else: home_max_ratio = get_search_result_most_likely_ratio(driver, participants)
+
+    search_term(driver, participants[1])
+    if no_results_found(driver): away_max_ratio = 0
+    else: away_max_ratio = get_search_result_most_likely_ratio(driver, participants)
+
+    max_ratio = max(event_max_ratio, max(home_max_ratio, away_max_ratio))
+
+    # TODO: tenemos que determinar un ratio mínimo (param de config) para determinar que el evento ha sido encontrado.
+    #  En caso contrario, no efectuamos la apuesta por el error BetError.EVENT_NOT_FOUND (otro puede ser BetError.ODDS_ABOVE_MINIMUM)
+    minimum_ratio_for_searching_event : float = 61
+    if max_ratio < minimum_ratio_for_searching_event:
+        return
+
+    #   comprobamos para cuál de las 3 strings hemos obtenido el mejor resultado e introducimos el término
+    if max_ratio == event_max_ratio: search_term(driver, str.join(" ", participants))
+    elif max_ratio == away_max_ratio: search_term(driver, participants[1])
+    elif max_ratio == home_max_ratio: search_term(driver, participants[0])
+
+    # TODO: hacemos click en la primera tarjeta cuya ratio coincida con el máximo
+    best_search_result_xpath : str = get_search_result_xpath_by_ratio(driver, max_ratio, participants)
+    if best_search_result_xpath:
+        #   TODO: necesitamos devolver de alguna manera el nombre con el que aparecen los participants en la web para
+        #    encontrar luego la fila en favs (variable global o algo)
+        web_participants = [p.strip() for p in (sel_util.find_element_by_xpath(driver, f"{best_search_result_xpath}{pom.SEARCH_RESULT_NAME}")
+                            .text.split(" vs. "))]
+        sel_util.selenium_click(driver, best_search_result_xpath)
+    time.sleep(random.uniform(0.5, 1.2))
+
+
+    # select_search_result(driver, participants)
+
+def get_search_result_xpath_by_ratio(driver : uc.Chrome, ratio : float, participants : list) -> str | None:
+    sel_util.wait_element_clickable(driver, pom.SEARCH_RESULT_CARD)
+    sel_util.random_wait(0.1, 0.3)
+    for i in range(0, len(sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD))):
+        xpath: str = f"{pom.SEARCH_RESULT_CARD}[{i + 1}]{pom.SEARCH_RESULT_NAME}"
+        search_result_event_string: str = sel_util.find_element_by_xpath(driver, xpath).text.lower()
+        search_result_event_participants: list = [p.strip() for p in search_result_event_string.split(
+            " vs. ")]  # TODO: a config el participants separator
+        if ratio == compute_ratio(participants, search_result_event_participants):
+            return f"{pom.SEARCH_RESULT_CARD}[{i + 1}]"
+    return None
+
+def search_term(driver : uc.Chrome, term : str) -> None:
+    # TODO: al log
+    click_all_sports_filter_in_search_modal(driver)
     sel_util.wait_element_visible(driver, pom.SEARCH_BAR_INPUT)
     sel_util.wait_element_clickable(driver, pom.SEARCH_BAR_INPUT)
     time.sleep(random.uniform(0.2, 0.45))
-    sel_util.selenium_send_keys(driver, pom.SEARCH_BAR_INPUT, event.replace(" - ", " "))    # TODO: sin guiones
-    time.sleep(random.uniform(0.8, 1.2))
-    # clic en la tarjeta con el resultado deseado
-    select_search_result(driver, event)
-    time.sleep(random.uniform(0.5, 1.2))
+    # TODO si lo que vamos a buscar es igual a lo que hay, no introducimos nada ??
+    sel_util.selenium_clear_input(driver, pom.SEARCH_BAR_INPUT)
+    sel_util.random_wait(0.1, 0.3)
+    sel_util.selenium_send_keys(driver, pom.SEARCH_BAR_INPUT, term)
 
-def select_search_result(driver: uc.Chrome, event: str) -> None:
-    # TODO: se puede mejorar. No hacer clic en la primera tarjeta, buscar la tarjeta según el contenido del string event
-    sel_util.selenium_click(driver, pom.SEARCH_RESULT_CARD)
-    # esperamos que se oculte el modal y una cantidad aleatoria de tiempo, o que sea clickable el botón de la cuota
-    sel_util.wait_element_invisible(driver, pom.SEARCH_MODAL_DIV, 3)
-    time.sleep(random.uniform(0.4, 0.7))
+def click_all_sports_filter_in_search_modal(driver : uc.Chrome) -> None:
+    # TODO: al logger
+    if "selected" in sel_util.find_element_by_xpath(driver, f"{pom.SEARCH_MODAL_DIV}{pom.SEARCH_MODAL_ALL_SPORTS_FILTER}",
+                                                    False, 3).get_attribute("class"):
+        return
+    sel_util.wait_element_visible(driver, f"{pom.SEARCH_MODAL_DIV}{pom.SEARCH_MODAL_ALL_SPORTS_FILTER}")
+    sel_util.selenium_click(driver, f"{pom.SEARCH_MODAL_DIV}{pom.SEARCH_MODAL_ALL_SPORTS_FILTER}")
+    sel_util.random_wait(1.3, 2.1)
+
+def no_results_found(driver : uc.Chrome) -> bool:
+    sel_util.random_wait(0.4, 0.9)
+    return sel_util.is_element_present(driver, pom.NO_RESULTS_DIV, 2)
+
+def get_found_event_cards(driver : uc.Chrome) -> list:
+    sel_util.random_wait(0.4, 0.8)
+    return sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD, 3)
+
+def get_search_result_most_likely_ratio(driver : uc.Chrome, participants : list) -> float:
+    """
+    Devuelve el ratio mayor de entre todos los resultados de búsqueda que se muestran, en comparación con el término
+    que recibe como argumento
+    :param driver:
+    :param participants:
+    :return:
+    """
+    max_ratio : float = 0
+    # TODO: a lo mejor podemos decir que si home y away tienen un fuzz_helper.get_partial_ratio de 100, lo hemos encontrado
+    # TODO: debemos penalizar el resultado si uno de los participants tiene un índice excesivamente bajo
+    sel_util.wait_element_clickable(driver, pom.SEARCH_RESULT_CARD)
+    sel_util.random_wait(0.1, 0.3)
+    for i in range(0, len(sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD))):
+        xpath : str = f"{pom.SEARCH_RESULT_CARD}[{i+1}]{pom.SEARCH_RESULT_NAME}"
+        search_result_event_string : str = sel_util.find_element_by_xpath(driver, xpath).text.lower()
+        search_result_event_participants : list = [p.strip() for p in search_result_event_string.split(" vs. ")]    # TODO: a config el participants separator
+        max_ratio = max(max_ratio, compute_ratio(participants, search_result_event_participants))
+    return max_ratio
+
+# TODO: llevar todos los cálculos del ratio fuera de aquí
+def compute_ratio(pick_participants : list, search_result_event_participants : list) -> float:
+    home_ratio: float = fuzz_helper.get_ratio(pick_participants[0].lower(), search_result_event_participants[0].lower())
+    away_ratio: float = fuzz_helper.get_ratio(pick_participants[1].lower(), search_result_event_participants[1].lower())
+
+    home_partial_ratio: float = fuzz_helper.get_partial_ratio(pick_participants[0].lower(), search_result_event_participants[0].lower())
+    away_partial_ratio: float = fuzz_helper.get_partial_ratio(pick_participants[1].lower(), search_result_event_participants[1].lower())
+
+    partial_ratio_factor : float = 0.65  # TODO: parametrizar
+    computed_ratio: float  = ((1.0 - partial_ratio_factor) * (home_ratio + away_ratio)/2
+                              + partial_ratio_factor * (home_partial_ratio + away_partial_ratio)/2)
+    return min(100.0, computed_ratio)
+
+def get_most_likely_event_card_xpath(driver : uc.Chrome, participants : list) -> str:
+    """
+    Para obtener el resultado de búsqueda más parecido para el evento
+    :param driver: 
+    :param participants: 
+    :return: 
+    """
+    # TODO: obtenemos el ratio fuzz para cada tarjeta y devolvemos la más similar si supera cierto umbral, en caso contrario, None
+    most_likely_card_xpath : str = ""
+    for card in get_found_event_cards(driver):
+        pass
+    return most_likely_card_xpath
 
 # MARKETS
 def place_bet(driver : uc.Chrome, event : str, bet : dict, stake : float):

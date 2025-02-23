@@ -16,6 +16,8 @@ SEARCH_BAR_INPUT = "//div[contains(@class, 'search')]//input[contains(@class, 's
 CLOSE_SEARCH_MODAL_BUTTON = "//div[contains(@class, 'close')]" # respecto del modal
 SEARCH_RESULT_CARD = "//a[contains(@class, 'searchResultItemWrapper')]" # hacer clic para seleccionar el evento, se puede uysar directamente con índices
 SEARCH_RESULT_NAME = "//div[contains(@class, 'resultName')]"    # dentro de la tarjeta SEARCH_RESULT_CARD, ESTE NO SE PUEDE INDEXAR
+NO_RESULTS_DIV = "//div[contains(@class, 'styles_resultsLength') and text()='0']"
+SEARCH_MODAL_ALL_SPORTS_FILTER = "//li[contains(@class, 'sportsListItem ')][1]"
 
 # Favourites section
 FAVOURITES_SECTION_TBODY = "//tbody[contains(@class, 'styles_favourite')]" # se puede usar para comprobar que hemos hecho login bien

@@ -12,6 +12,12 @@ betsheet_db : Database = client["betsheet1"]
 pick_coll : Collection = betsheet_db["pick"]
 bet_coll : Collection = betsheet_db["bet"]
 user_coll : Collection = betsheet_db["user"]
+config_coll : Collection = betsheet_db["config"]
+
+# TODO: sustituir config por db y cambiar en todos lados
+
+def find_by_kv(coll_name : str, key : str, value : any):
+    pass
 
 def insert_pick(pick : Pick) -> None:
     # TODO: consideramos que está duplicado si tiene la misma UID, evento y bet

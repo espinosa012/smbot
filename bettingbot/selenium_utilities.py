@@ -16,6 +16,7 @@ def get_driver() -> uc.Chrome:
     chrome_options.add_argument("--incognito")
     driver : uc.Chrome = uc.Chrome(options=chrome_options)
     driver.maximize_window()
+    driver.execute_script("window.focus();")
     driver.implicitly_wait(10)
     return driver
 
@@ -46,17 +47,20 @@ def wait_element_invisible(driver : uc.Chrome, xpath : str, timeout : int = 10) 
         except TimeoutException:
             pass # TODO: indicar en logger que el elemento no ha desaparecido
 
-def is_element_present(driver : uc.Chrome, xpath : str) -> bool:
+def is_element_present(driver : uc.Chrome, xpath : str, timeout : int = 10) -> bool:
+    driver.implicitly_wait(timeout)
     return bool(driver.find_elements(By.XPATH, xpath))
 
-def find_element_by_xpath(driver : uc.Chrome, xpath : str, retry : bool = False) -> WebElement | None:
+def find_element_by_xpath(driver : uc.Chrome, xpath : str, retry : bool = False, timeout : int = 10) -> WebElement | None:
+    driver.implicitly_wait(timeout)
     if is_element_present(driver, xpath):
         return driver.find_element(By.XPATH, xpath)
     elif retry:
         return find_element_by_xpath(driver, xpath, False)
         # TODO: indicar en logger que no se ha encontrado el elemento a clickar
 
-def find_elements_by_xpath(driver :uc.Chrome, xpath : str) -> list:
+def find_elements_by_xpath(driver :uc.Chrome, xpath : str, timeout : int = 10) -> list:
+    driver.implicitly_wait(timeout)
     return driver.find_elements(By.XPATH, xpath)
 
 def find_element_by_partial_text(driver : uc.Chrome, xpath : str, text : str) -> WebElement | None:
@@ -82,7 +86,10 @@ def selenium_send_keys(driver : uc.Chrome, xpath : str, value : str) -> None:
         elem.send_keys(char)
         time.sleep(random.uniform(0.04, 0.23))
     time.sleep(random.uniform(0.4, 0.7))    # TODO: parametrizar la espera
-    
+
+def random_wait(min : float, max : float):
+    time.sleep(random.uniform(min, max))
+
 def save_screenshot(driver : uc.Chrome):
     #TODO
     pass

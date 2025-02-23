@@ -102,7 +102,6 @@ class MailReader:
 
     def process_pick(self, pick: Pick):
         """ Procesa un pick individual (almacenamiento, notificación, emisión...) """
-        # TODO: enviar al endpoint de procesado de picks
         print(f"Incoming pick: {pick.Event}, {pick.Bet["Market"]}-{pick.Bet["Selection"]}")  # TODO: al logger
         try:
             requests.post(f"{self.get_server_address()}/process-pick", data=json.dumps(pick.to_dict()),
