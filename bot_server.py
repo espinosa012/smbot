@@ -49,8 +49,8 @@ def process_pick():
     pass
     # for user in db.get_active_users():
     # for user in [get_config_users()[1]]:
-    for user in get_config_users():
-        bet : Bet = Bet(pick, user, 2)
+    for user in [u for u in get_config_users() if u.IsActive]:
+        bet : Bet = Bet(pick, user, user.DefaultStake)
         print(f"Placing bet for user {user.Username}") # TODO: al logger
         bot = SMBot()
         bot.place_bet(bet)
@@ -68,7 +68,7 @@ def get_config_users():
     users: list = []
     for user_dict in json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config/config.json'),
                                     'r'))["users"]["betinasia"]:
-        users.append(User(user_dict["url"], user_dict["username"], user_dict["password"], user_dict["active"]))
+        users.append(User(user_dict["url"], user_dict["username"], user_dict["password"], user_dict["default_stake"], user_dict["active"]))
     return users
 
 
