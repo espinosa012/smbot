@@ -22,7 +22,7 @@ def login(driver: uc.Chrome, username: str, password: str) -> None:
 def search_event(driver: uc.Chrome, pick : Pick) -> bool:  # true si lo encuentra, false si no
     open_search_modal(driver, True) # con 1 reintento
     ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, pick.Participants)
-    minimum_ratio_for_searching_event: float = 61 # TODO a config
+    minimum_ratio_for_searching_event: float = 70 # TODO a config
     if ratio < minimum_ratio_for_searching_event:
         return False    # TODO: y ponemos en Bet el error EVENT_NOT_FOUND
     click_best_search_result(driver, ratio, pick)

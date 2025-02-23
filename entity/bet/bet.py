@@ -7,10 +7,10 @@ class Bet:
     User : User
     Stake : float
 
-    PlacedOdd : float
+    PlacedOdd : float = -1.0
     PlacingError : bool = False # TODO: tener un BetErrorEnum (evento no encontrado, bajo cuota mínima, error de selenium...)
     IsPlaced : bool = False
-    Result : str
+    Result : str = None
 
     def __init__(self, pick : Pick, user : User, stake : float):
         self.Pick = pick
