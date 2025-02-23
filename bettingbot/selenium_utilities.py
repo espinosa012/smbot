@@ -8,17 +8,16 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException
 
 
-# TODO: necesito comprobar el user agent de undetected, con wireshark o lo que sea
 # TODO: meter logger
 
-def get_driver() -> uc.Chrome:
+def get_driver(headless : bool = False) -> uc.Chrome:
     chrome_options = uc.ChromeOptions()
     chrome_options.add_argument("--incognito")
-    chrome_options.add_argument("--headless")
+    if headless: chrome_options.add_argument("--headless")
     driver : uc.Chrome = uc.Chrome(options=chrome_options)
     driver.maximize_window()
     driver.execute_script("window.focus();")
-    driver.execute_cdp_cmd(
+    if headless: driver.execute_cdp_cmd(
         "Network.setUserAgentOverride", {"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"}
     )
     driver.implicitly_wait(10)
@@ -91,9 +90,8 @@ def selenium_send_keys(driver : uc.Chrome, xpath : str, value : str) -> None:
         time.sleep(random.uniform(0.04, 0.23))
     time.sleep(random.uniform(0.4, 0.7))    # TODO: parametrizar la espera
 
-def random_wait(min : float, max : float):
-    time.sleep(random.uniform(min, max))
+def random_wait(_min : float, _max : float):
+    time.sleep(random.uniform(_min, _max))
 
-def save_screenshot(driver : uc.Chrome):
-    #TODO
-    pass
+def save_screenshot(driver : uc.Chrome, filename : str = "screenshot.png"):
+    driver.save_screenshot(filename)
