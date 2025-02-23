@@ -31,8 +31,9 @@ class SMBot:
         self.driver.close()
 
     # SportMarket/Betinasia black
-    def place_bet(self, bet: Bet) -> None:
+    def place_bet(self, bet: Bet) -> bool:
         # TODO: es importante gestionar las excepciones y afectar a los campos de Bet
+        bet_placed_ok: bool = False
         try:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
@@ -40,17 +41,21 @@ class SMBot:
             # cerrar el panel de Pedidos recientes
             betinasia.close_footer(self.driver)
             # buscar el evento
-            betinasia.search_event(self.driver, bet.Pick)
-            # TODO: si no lo hemos encontrado (ratio minimo), lo indicamos en la Bet e interrumpimos la colocación
+            event_found : bool = betinasia.search_event(self.driver, bet.Pick)
+            if not event_found:
+                # TODO: indicar en el logger que el evento no se ha encontrado y notificar de alguna manera.
+                #  Es un evento crítico. También indicar en el campo de la apuesta
+                bet.IsPlaced = False
+                return False
 
-            # comprobar la cuota y apostar si procede
+            # comprobar la cuota y apostar si procede (será configurable por usuario)
             # if betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames, bet.Pick.MinOdds,bet.Pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
-            betinasia.place_bet(self.driver, bet)
-            # TODO: obtener la cuota colocada, que está en la fila del evento en el panel Pedidos recientes, en la columna Precio
 
-            # TODO: tenemos que determinar si se ha colocado correctamente, e indicarlo en el campo correspondiente de Bet.
+            bet_placed_ok = betinasia.place_bet(self.driver, bet)
+            bet.IsPlaced = bet_placed_ok
+
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
             time.sleep(1)
         except Exception as e:
             print(f"Exception placing pick: {e}") # tODO: mejorar el mensaje y llevar a log
-        time.sleep(2)
+        return bet_placed_ok

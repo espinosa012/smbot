@@ -152,17 +152,23 @@ def compute_ratio(pick_participants : list, search_result_event_participants : l
 # MARKETS
 def place_bet(driver : uc.Chrome, bet : Bet):
     # clic en la cuota que corresponda
-    click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
-    # seleccionar la cuota
-    click_best_odds(driver)
-    # tomar valor de la cuota colocada
-    bet.PlacedOdd = get_placed_odds(driver)
-    # mandar stake y clic en apostar
-    place_stake(driver, bet.Stake)
-    # esperar que se muestre el modal de confirmación y clic
-    confirm_bet_placing(driver)
-    # cerrar el modal
-    close_placer_modal(driver)
+    try:
+        click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
+        # seleccionar la cuota
+        click_best_odds(driver)
+        # tomar valor de la cuota colocada
+        bet.PlacedOdd = get_placed_odds(driver)
+        # mandar stake y clic en apostar
+        place_stake(driver, bet.Stake)
+        # esperar que se muestre el modal de confirmación y clic
+        confirm_bet_placing(driver)
+        # cerrar el modal
+        close_placer_modal(driver)
+        return True
+    except Exception as e:
+        print(f"Error placing bet for user {bet.User.Username}: {e}")
+        return False
+
 
 def click_selection(driver : uc.Chrome, participants : list, bet : dict):
     sel_util.selenium_click(driver, get_selection_xpath_by_event_and_bet(driver, participants, bet))
@@ -174,9 +180,12 @@ def click_best_odds(driver : uc.Chrome):
     time.sleep(random.uniform(0.3, 0.6))
 
 def get_placed_odds(driver : uc.Chrome):
-    sel_util.wait_element_clickable(driver, pom.PLACED_ODDS_INPUT)
-    sel_util.random_wait(0.1, 0.3)
-    return float(sel_util.find_element_by_xpath(driver, pom.PLACED_ODDS_INPUT).get_attribute("value"))
+    try:
+        sel_util.wait_element_clickable(driver, pom.PLACED_ODDS_INPUT)
+        sel_util.random_wait(0.1, 0.3)
+        return float(sel_util.find_element_by_xpath(driver, pom.PLACED_ODDS_INPUT).get_attribute("value"))
+    except Exception as e:
+        print(f"Error getting placed odds: {e}")    # todo: al logger
 
 def place_stake(driver : uc.Chrome, stake : float):
     sel_util.selenium_clear_input(driver, pom.STAKE_INPUT)
@@ -193,9 +202,12 @@ def confirm_bet_placing(driver : uc.Chrome):
     sel_util.wait_element_invisible(driver, pom.PLACE_CONFIRMATION_MODAL_DIV, 3)
 
 def close_placer_modal(driver : uc.Chrome):
-    sel_util.wait_element_clickable(driver, pom.PLACE_BET_BUTTON)
-    sel_util.selenium_click(driver, pom.CLOSE_PLACER_MODAL_DIV)
-    sel_util.wait_element_invisible(driver, pom.PLACER_MODAL_DIV)
+    try:    # no debe generar excepción
+        sel_util.wait_element_clickable(driver, pom.PLACE_BET_BUTTON)
+        sel_util.selenium_click(driver, pom.CLOSE_PLACER_MODAL_DIV)
+        sel_util.wait_element_invisible(driver, pom.PLACER_MODAL_DIV)
+    except Exception as e:
+        print(f"Error closing placer modal: {e}")   # tODO: al logger, es leve
 
 # ODDS
 def check_odds(driver: uc.Chrome, participants: list, min_odds: float, bet: dict) -> bool:

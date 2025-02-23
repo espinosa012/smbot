@@ -8,8 +8,7 @@ class Bet:
     Stake : float
 
     PlacedOdd : float
-    IsUnderMinOdds : bool = False
-    PlacingError : bool = False # TODO: tener un BetErrorEnum
+    PlacingError : bool = False # TODO: tener un BetErrorEnum (evento no encontrado, bajo cuota mínima, error de selenium...)
     IsPlaced : bool = False
     Result : str
 
@@ -25,7 +24,6 @@ class Bet:
             "Stake": self.Stake if self.Stake else -1,
 
             "PlaceOdd": self.PlacedOdd if self.PlacedOdd else -1,
-            "IsUnderMinOdds": self.IsUnderMinOdds if self.IsUnderMinOdds else False,
             "PlacingError": self.PlacingError if self.PlacingError else False,
             "IsPlaced": self.IsPlaced if self.IsPlaced else False,
             "Result": self.IsPlaced if self.IsPlaced else ""
