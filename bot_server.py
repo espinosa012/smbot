@@ -29,6 +29,13 @@ def watch():
         threading.Thread(target=mail_reader.watch, args=([True])).start()
     return "ok"
 
+@app.route('/stop-watching', methods=['GET'])
+def stop_watching():
+    print("Mail reader stopped watching.")  # TODO: al logger
+    mail_reader.stop_watching()
+    return "ok"
+
+
 @app.route('/log', methods=['POST'])
 def log():
     # TODO: usar un logger propio
@@ -53,7 +60,7 @@ def process_pick():
         bet : Bet = Bet(pick, user, user.DefaultStake)
         print(f"Placing bet for user {user.Username}") # TODO: al logger
         bot = SMBot()
-        bot.place_bet(bet)
+        bot.place_bet(bet)  # TODO: gestionar excepción aquí
         bot.quit()
         db.insert_bet(bet)    #TODO probar
     return "ok"

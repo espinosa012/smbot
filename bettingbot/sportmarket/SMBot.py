@@ -34,7 +34,7 @@ class SMBot:
         try:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
-            if not betinasia.login(self.driver, bet.User.Username, bet.User.Password):
+            if not betinasia.login(self.driver, bet.User.Username, bet.User.Password):  # tODO: pasarle un parámetro retry
                 print(f"Error logging in for user: {bet.User.Username} ({bet.User.Url})")   # TODO: logger
                 bet.IsPlaced = False
                 bet.PlacingError = "Error logging in"  # TODO: usar enum

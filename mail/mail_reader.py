@@ -69,6 +69,9 @@ class MailReader:
             pass  # TODO: indicar en logger la llegada de nuevos mensajes
         return new_messages_ids
 
+    def stop_watching(self):
+        self.IsWatching = False
+
     def watch(self, process_previous_messages : bool = False):
         # TODO: gestionar los errores por pérdida de conexión. Reintentar cada x tiempo mientras IsWatching
         """ Se mantiene monitorizando el buzón 'MailBox' (por defecto INBOX) mientras IsWatching es True. Para cada
