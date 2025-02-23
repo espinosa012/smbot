@@ -8,7 +8,7 @@ class Bet:
     Stake : float
 
     PlacedOdd : float = -1.0
-    PlacingError : bool = False # TODO: tener un BetErrorEnum (evento no encontrado, bajo cuota mínima, error de selenium...)
+    PlacingError : str = False # TODO: tener un BetErrorEnum (evento no encontrado, bajo cuota mínima, error de selenium...)
     IsPlaced : bool = False
     Result : str = None
 

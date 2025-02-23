@@ -45,7 +45,9 @@ class SMBot:
             if not event_found:
                 # TODO: indicar en el logger que el evento no se ha encontrado y notificar de alguna manera.
                 #  Es un evento crítico. También indicar en el campo de la apuesta
+                print(f"Event not foud: {bet.Pick.Event}")
                 bet.IsPlaced = False
+                bet.PlacingError = "Event not found" # TODO: usar enum
                 return False
 
             # comprobar la cuota y apostar si procede (será configurable por usuario)
