@@ -122,8 +122,6 @@ def get_search_result_most_likely_ratio(driver : uc.Chrome, searched_term : str,
     if no_results_found(driver):
         return 0
 
-    # TODO: a lo mejor podemos decir que si home y away tienen un fuzz_helper.get_partial_ratio de 100, lo hemos encontrado
-    # TODO: debemos penalizar el resultado si uno de los participants tiene un índice excesivamente bajo
     sel_util.wait_element_clickable(driver, pom.SEARCH_RESULT_CARD)
     sel_util.random_wait(0.1, 0.3)
     for i in range(0, len(sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD))):

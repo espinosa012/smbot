@@ -44,11 +44,12 @@ def logs():
 def process_pick():
     pick : Pick = get_request_pick(request)
     # almacenamos el pick en la base de datos
-    db.insert_pick(pick)
+    # db.insert_pick(pick)
     # TODO: notificamos la llegada de un nuevo pick
     pass
     # for user in db.get_active_users():
-    for user in get_config_users():
+    # for user in get_config_users():
+    for user in [get_config_users()[1]]:
         bet : Bet = Bet(pick, user, 2)
         # TODO: colocamos la apuesta para el usuario, y cuando termine, el siguiente usuario
         print("Placing bet...") # TODO: al logger
