@@ -53,7 +53,9 @@ def process_pick():
         bet : Bet = Bet(pick, user, 2)
         # TODO: colocamos la apuesta para el usuario, y cuando termine, el siguiente usuario
         print("Placing bet...") # TODO: al logger
-        SMBot().place_bet(bet)
+        bot = SMBot()
+        bot.place_bet(bet)
+        bot.quit()
         # db.insert_bet(bet)    #TODO probar
 
     return "ok"

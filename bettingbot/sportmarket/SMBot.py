@@ -37,24 +37,24 @@ class SMBot:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
             betinasia.login(self.driver, bet.User.Username, bet.User.Password)
+            # TODO: cerrar el panel de Pedidos recientes
+            betinasia.close_footer(self.driver)
+            pass
             # buscar el evento
-            # TODO: comprobar antes si ya está en favs
-            betinasia.search_event(self.driver, bet.Pick.Participants)
+            betinasia.search_event(self.driver, bet.Pick)
             # TODO: si no lo hemos encontrado (ratio minimo), lo indicamos en la Bet e interrumpimos la colocación
 
             # comprobar la cuota y apostar si procede
-            if betinasia.check_odds(self.driver, bet.Pick.Event, bet.Pick.MinOdds,
+            if betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames, bet.Pick.MinOdds,
                                     bet.Pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
-                betinasia.place_bet(self.driver, bet.Pick.Event, bet.Pick.Bet, bet.Stake)
+                betinasia.place_bet(self.driver, bet.Pick.WebParticipantNames, bet.Pick.Bet, bet.Stake)
             # TODO: obtener la cuota colocada, que está en la fila del evento en el panel Pedidos recientes, en la columna Precio
 
-            # TODO: cerrar el panel de Pedidos recientes
-            pass
+
             # TODO: tenemos que determinar si se ha colocado correctamente, e indicarlo en el campo correspondiente de Bet.
             # eliminar de favoritos (opcional)
-            betinasia.remove_event_from_favourites(self.driver, bet.Pick.Event, True)  # si falla lo reintentamos
+            betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
             time.sleep(1)
         except Exception as e:
             print(f"Exception placing pick: {e}") # tODO: mejorar el mensaje y llevar a log
         time.sleep(2)
-        quit()

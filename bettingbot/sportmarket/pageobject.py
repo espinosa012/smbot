@@ -23,6 +23,7 @@ SEARCH_MODAL_ALL_SPORTS_FILTER = "//li[contains(@class, 'sportsListItem ')][1]"
 FAVOURITES_SECTION_TBODY = "//tbody[contains(@class, 'styles_favourite')]" # se puede usar para comprobar que hemos hecho login bien
 EVENT_ROW_TR = "//tr[contains(@class, 'eventRow')]" # RESPECTO DE FAVOURITES_SECTION
 FAVOURITE_EVENT_ICON = "//*[local-name()='svg' and contains(@class, 'favouriteIcon')]"
+NO_FAVOURITE_EVENTS = "//div[contains(@class, 'noSelectedEventMessage')]"
 # al hacer clic en favorito, dentro de la sección Favoritos, se elimina la fila del evento del dom
 
 # SELECTIONS
@@ -52,3 +53,8 @@ BOOKIE_PRICE_ROW = "//div[contains(@class, 'bookieAccountPrices')]"
 PLACE_CONFIRMATION_MODAL_DIV = "//div[contains(@class, 'placeConfirmationModal')]"
 PLACE_CONFIRMATION_MODAL_FOOTER_DIV = "//div[contains(@class, 'placeConfirmationModalFooter')]"
 CONFIRM_PLACE_BUTTON = "//button[contains(@class, 'button')][2]"
+
+# Bet bar (footer)
+BET_BAR_FOOTER_DIV = "//div[contains(@class, 'betBar')]"
+EXPANDED_BET_BAR_FOOTER_DIV = "//*[local-name()='svg' and contains(@class, 'expanded')]/ancestor::div[contains(@class, 'betBar')]"
+TOGGLE_BET_BAR_FOOTER_BUTTON = "//div[contains(@class, 'header')]//div[contains(@class, 'toggle')]"

@@ -1,6 +1,7 @@
 import undetected_chromedriver as uc
 from undetected_chromedriver import WebElement
 
+from entity.pick.pick import Pick
 from fuzz import fuzz_helper
 import bettingbot.selenium_utilities as sel_util
 import bettingbot.sportmarket.pageobject as pom
@@ -19,13 +20,13 @@ def login(driver: uc.Chrome, username: str, password: str) -> None:
     time.sleep(random.uniform(0.5, 1))  # TODO: llevar esto y todos los que hay a selenium_utilities
 
 # SEARCHING EVENT
-def search_event(driver: uc.Chrome, participants : list) -> bool:  # true si lo encuentra, false si no
+def search_event(driver: uc.Chrome, pick : Pick) -> bool:  # true si lo encuentra, false si no
     open_search_modal(driver, True) # con 1 reintento
-    ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, participants)
+    ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, pick.Participants)
     minimum_ratio_for_searching_event: float = 61 # TODO a config
     if ratio < minimum_ratio_for_searching_event:
         return False    # TODO: y ponemos en Bet el error EVENT_NOT_FOUND
-    click_best_search_result(driver, ratio, participants)
+    click_best_search_result(driver, ratio, pick)
     return sel_util.is_element_present(driver, pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR)
 
 def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
@@ -40,32 +41,36 @@ def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
 
 def search_event_in_search_modal_and_get_most_likely_ratio(driver: uc.Chrome, participants : list) -> float:
     # Deja la búsqueda hecha en el modal y devuelve el mejor ratio encontrado
+    confidence_ration : float = 91  # TODO: a config
     event_max_ratio : float = get_search_result_most_likely_ratio(driver, str.join(" ", participants), participants) # calidad del mejor resultado obtenido introduciendo los dos
+    if event_max_ratio >= confidence_ration: return event_max_ratio
     home_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[0], participants)
+    if home_max_ratio >= confidence_ration: return event_max_ratio
     away_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[1], participants)  # calidad del mejor resultado obtenido introduciendo solo el away
-    # TODO: podríamos decir que si alguno es superior a un umbral grande, tipo 90, damos por hecho que es el mejor
+    if away_max_ratio >= confidence_ration: return event_max_ratio
+
     # Buscamos con qué string obtenemos el mejor resultado
     max_ratio : float = max(event_max_ratio, max(home_max_ratio, away_max_ratio))
     # TODO: es poco eficiente, calculamos el ratio 2 veces
     # comprobamos para cuál de las 3 strings hemos obtenido el mejor resultado e introducimos el término
-    if max_ratio == event_max_ratio: search_term(driver, str.join(" ", participants))
-    elif max_ratio == away_max_ratio: search_term(driver, participants[1])
+    if max_ratio == away_max_ratio: search_term(driver, participants[1])
     elif max_ratio == home_max_ratio: search_term(driver, participants[0])
+    elif max_ratio == event_max_ratio: search_term(driver, str.join(" ", participants))
 
     return max_ratio
 
-def click_best_search_result(driver : uc.Chrome, likely_ratio : float, participants : list):
+def click_best_search_result(driver : uc.Chrome, likely_ratio : float, pick : Pick):
     # hacemos clic en la primera tarjeta cuya ratio coincida con el máximo
-    best_search_result_xpath: str = get_search_result_xpath_by_ratio(driver, likely_ratio, participants)
+    best_search_result_xpath: str = get_search_result_xpath_by_ratio(driver, likely_ratio, pick.Participants)
     if best_search_result_xpath:
-        #   TODO: necesitamos devolver de alguna manera el nombre con el que aparecen los participants en la web para
-        #    encontrar luego la fila en favs (variable global o algo)
-        web_participants = [p.strip() for p in (
-            sel_util.find_element_by_xpath(driver, f"{best_search_result_xpath}{pom.SEARCH_RESULT_NAME}")
-            .text.split(" vs. "))]
-
+        set_pick_web_participant_names(driver, best_search_result_xpath, pick)
         sel_util.selenium_click(driver, best_search_result_xpath)
     time.sleep(random.uniform(0.5, 1.2))
+
+def set_pick_web_participant_names(driver : uc.Chrome, best_search_result_xpath : str, pick : Pick):
+    pick.WebParticipantNames = [p.strip() for p in (
+        sel_util.find_element_by_xpath(driver, f"{best_search_result_xpath}{pom.SEARCH_RESULT_NAME}")
+        .text.split(" vs. "))]  # tODO: separator a config
 
 def get_search_result_xpath_by_ratio(driver : uc.Chrome, ratio : float, participants : list) -> str | None:
     sel_util.wait_element_clickable(driver, pom.SEARCH_RESULT_CARD)
@@ -158,9 +163,9 @@ def get_most_likely_event_card_xpath(driver : uc.Chrome, participants : list) ->
     return most_likely_card_xpath
 
 # MARKETS
-def place_bet(driver : uc.Chrome, event : str, bet : dict, stake : float):
+def place_bet(driver : uc.Chrome, participants : list, bet : dict, stake : float):
     # clic en la cuota que corresponda
-    click_selection(driver, event, bet)
+    click_selection(driver, participants, bet)
     # seleccionar la cuota
     click_best_odds(driver)
     # mandar stake y clic en apostar
@@ -170,8 +175,8 @@ def place_bet(driver : uc.Chrome, event : str, bet : dict, stake : float):
     # cerrar el modal
     close_placer_modal(driver)
 
-def click_selection(driver : uc.Chrome, event : str, bet : dict):
-    sel_util.selenium_click(driver, get_selection_xpath_by_event_and_bet(driver, event, bet))
+def click_selection(driver : uc.Chrome, participants : list, bet : dict):
+    sel_util.selenium_click(driver, get_selection_xpath_by_event_and_bet(driver, participants, bet))
 
 def click_best_odds(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
@@ -199,19 +204,19 @@ def close_placer_modal(driver : uc.Chrome):
     sel_util.wait_element_invisible(driver, pom.PLACER_MODAL_DIV)
 
 # ODDS
-def check_odds(driver: uc.Chrome, event: str, min_odds: float, bet: dict) -> bool:
-    return get_odds(driver, event, bet) >= min_odds
+def check_odds(driver: uc.Chrome, participants: list, min_odds: float, bet: dict) -> bool:
+    return get_odds(driver, participants, bet) >= min_odds
 
-def get_odds(driver: uc.Chrome, event: str, bet: dict) -> float:
-    bet_web_element_xpath = get_selection_xpath_by_event_and_bet(driver, event, bet)
+def get_odds(driver: uc.Chrome, participants: list, bet: dict) -> float:
+    bet_web_element_xpath = get_selection_xpath_by_event_and_bet(driver, participants, bet)
     bet_web_element = sel_util.find_element_by_xpath(driver, bet_web_element_xpath)
     if bet_web_element:
         return float(bet_web_element.text)
     return 0    # TODO: informar por logger
 
-def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : dict) -> str | None:
-    # event_row_xpath: str = get_favourite_event_row_xpath(driver, event)
-    event_row_xpath: str = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR  # TODO: cuidado
+def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, participants : list, bet : dict) -> str | None:
+    event_row_xpath: str = get_favourite_event_row_xpath(driver, participants)
+    # event_row_xpath: str = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR  # TODO: cuidado
     if bet["Market"] in ["1X2", "1x2"]:
         if bet["Selection"] == "H":
                 return event_row_xpath + pom.EVENT_SELECTION_1X2_HOME_TD
@@ -233,8 +238,7 @@ def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, event : str, bet : 
     # TODO: enum de mercados y selections
     return ""
 
-def get_favourite_event_row_xpath(driver : uc.Chrome, event : str) -> str:
-    participants : list = event.split(" - ")    # TODO: depende del formato del string del event
+def get_favourite_event_row_xpath(driver : uc.Chrome, participants : list) -> str:
     event_row_xpath = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR
     event_rows = sel_util.find_elements_by_xpath(driver, event_row_xpath)
     if event_rows:
@@ -243,11 +247,23 @@ def get_favourite_event_row_xpath(driver : uc.Chrome, event : str) -> str:
                 return f"{event_row_xpath}[{event_rows.index(elem) + 1}]"
     return ""   # TODO: generar excepcion
 
-def remove_event_from_favourites(driver : uc.Chrome, event : str, retry : bool = False) -> None:
+def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry : bool = False) -> None:
     try:
-        sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, event) + pom.FAVOURITE_EVENT_ICON)
-        sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, event))
+        sel_util.wait_element_clickable(driver, pom.FAVOURITE_EVENT_ICON, 5)
+        sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, participants) + pom.FAVOURITE_EVENT_ICON)
+        sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, participants))
+        sel_util.wait_element_visible(driver, f"{pom.FAVOURITES_SECTION_TBODY}")
     except Exception as e:
-        if retry:   remove_event_from_favourites(driver, event, False)
+        if retry:   remove_event_from_favourites(driver, participants, False)
         else: print(f"Error removing favourite event after retrying: {e}")
 
+def close_footer(driver : uc.Chrome):
+    try:
+        if not sel_util.is_element_present(driver, pom.EXPANDED_BET_BAR_FOOTER_DIV, 5):return
+        sel_util.wait_element_clickable(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}{pom.TOGGLE_BET_BAR_FOOTER_BUTTON}")
+        sel_util.selenium_click(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}{pom.TOGGLE_BET_BAR_FOOTER_BUTTON}")
+        sel_util.random_wait(0.1, 0.4)
+        sel_util.wait_element_invisible(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}", 3)
+        sel_util.random_wait(0.5, 0.8)
+    except Exception as e:
+        print(f"Exception closing footer> {e}") # TODO: al log
