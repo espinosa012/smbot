@@ -39,12 +39,13 @@ def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
     time.sleep(random.uniform(1.3, 2))
 
 def search_event_in_search_modal_and_get_most_likely_ratio(driver: uc.Chrome, participants : list) -> float:
+    # Deja la búsqueda hecha en el modal y devuelve el mejor ratio encontrado
     event_max_ratio : float = get_search_result_most_likely_ratio(driver, str.join(" ", participants), participants) # calidad del mejor resultado obtenido introduciendo los dos
     home_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[0], participants)
     away_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[1], participants)  # calidad del mejor resultado obtenido introduciendo solo el away
+    # TODO: podríamos decir que si alguno es superior a un umbral grande, tipo 90, damos por hecho que es el mejor
     # Buscamos con qué string obtenemos el mejor resultado
     max_ratio : float = max(event_max_ratio, max(home_max_ratio, away_max_ratio))
-
     # TODO: es poco eficiente, calculamos el ratio 2 veces
     # comprobamos para cuál de las 3 strings hemos obtenido el mejor resultado e introducimos el término
     if max_ratio == event_max_ratio: search_term(driver, str.join(" ", participants))
