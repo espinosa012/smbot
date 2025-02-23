@@ -31,27 +31,35 @@ class SMBot:
         self.driver.close()
 
     # SportMarket/Betinasia black
-    def place_bet(self, bet: Bet) -> bool:
+    def place_bet(self, bet: Bet, check_min_odds : bool = False) -> bool:
         # TODO: es importante gestionar las excepciones y afectar a los campos de Bet
         bet_placed_ok: bool = False
         try:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
-            betinasia.login(self.driver, bet.User.Username, bet.User.Password)
+            if not betinasia.login(self.driver, bet.User.Username, bet.User.Password):
+                print(f"Error logging in for user: {bet.User.Username} ({bet.User.Url})")   # TODO: logger
+                bet.IsPlaced = False
+                bet.PlacingError = "Error logging in"  # TODO: usar enum
+                return False
+
             # cerrar el panel de Pedidos recientes
             betinasia.close_footer(self.driver)
             # buscar el evento
             event_found : bool = betinasia.search_event(self.driver, bet.Pick)
             if not event_found:
-                # TODO: indicar en el logger que el evento no se ha encontrado y notificar de alguna manera.
-                #  Es un evento crítico. También indicar en el campo de la apuesta
-                print(f"Event not foud: {bet.Pick.Event}")
+                print(f"Event not found: {bet.Pick.Event}") # TODO: logger
                 bet.IsPlaced = False
                 bet.PlacingError = "Event not found" # TODO: usar enum
                 return False
 
             # comprobar la cuota y apostar si procede (será configurable por usuario)
-            # if betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames, bet.Pick.MinOdds,bet.Pick.Bet):  # TODO: cuidado, no estoy seguro de que la cuota sea ese td
+            if check_min_odds and not betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames,
+                                                           bet.Pick.MinOdds,bet.Pick.Bet):
+                print(f"Odds above minimum: {bet.Pick.Event}")
+                bet.IsPlaced = False
+                bet.PlacingError = "Odds above minimum"  # TODO: usar enum
+                return False
 
             bet_placed_ok = betinasia.place_bet(self.driver, bet)
             bet.IsPlaced = bet_placed_ok
@@ -60,5 +68,8 @@ class SMBot:
 
             time.sleep(1)
         except Exception as e:
-            print(f"Error placing pick: {e}") # tODO: mejorar el mensaje y llevar a log
+            print(f"Exception placing pick {bet.Pick.Event} ({bet.Pick.Bet['Market']} - {bet.Pick.Bet['Selection']})")
+            bet.IsPlaced = False
+            bet.PlacingError = "Error placing bet"  # TODO: usar enum
+            return False
         return bet_placed_ok

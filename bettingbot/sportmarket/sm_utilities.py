@@ -10,13 +10,17 @@ import time
 
 # TODO: loggers por todos lados
 
-def login(driver: uc.Chrome, username: str, password: str) -> None:
-    sel_util.wait_element_clickable(driver, pom.LOGIN_BUTTON)
-    sel_util.selenium_send_keys(driver, pom.LOGIN_USERNAME, username)
-    sel_util.selenium_send_keys(driver, pom.LOGIN_PASSWORD, password)
-    sel_util.selenium_click(driver, pom.LOGIN_BUTTON)
-    sel_util.wait_element_clickable(driver, pom.SEARCH_BUTTON, 20)
-    time.sleep(random.uniform(0.5, 1))  # TODO: llevar esto y todos los que hay a selenium_utilities
+def login(driver: uc.Chrome, username: str, password: str) -> bool:
+    try:
+        sel_util.wait_element_clickable(driver, pom.LOGIN_BUTTON)
+        sel_util.selenium_send_keys(driver, pom.LOGIN_USERNAME, username)
+        sel_util.selenium_send_keys(driver, pom.LOGIN_PASSWORD, password)
+        sel_util.selenium_click(driver, pom.LOGIN_BUTTON)
+        time.sleep(random.uniform(0.5, 1))  # TODO: llevar esto y todos los que hay a selenium_utilities
+        return sel_util.is_element_present(driver, pom.SEARCH_BUTTON, 20)
+    except Exception as e:
+        print(f"Error logging in: {e}")
+        return False
 
 # SEARCHING EVENT
 def search_event(driver: uc.Chrome, pick : Pick) -> bool:  # true si lo encuentra, false si no

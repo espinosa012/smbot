@@ -4,7 +4,7 @@
             {"username":"juamvu", "password":"London2098", "url": "https://pro.sportmarket.com/login?next=/trade",
                 "active": true, "bookie":"sportmarket", "default_stake": 2 },
             {"username":"espinosa024", "password":"google8ARE#betinasia", "url": "https://black.betinasia.com/",
-                "active": true, "bookie":"betinasia", "default_stake": 1 }
+                "active": true, "bookie":"betinasia", "default_stake": 2 }
         ]
     },
 
