@@ -62,7 +62,7 @@ def process_pick():
         bot = SMBot()
         bot.place_bet(bet)  # TODO: gestionar excepción aquí
         bot.quit()
-        db.insert_bet(bet)    #TODO probar
+        # db.insert_bet(bet)    #TODO probar
     return "ok"
 
 def get_request_pick(req) -> Pick:

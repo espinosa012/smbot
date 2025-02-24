@@ -26,7 +26,7 @@ class SMBot:
         return self.driver
 
     def quit(self):
-        self.driver.close()
+        # self.driver.close()
         self.driver.quit()
 
     # SportMarket/Betinasia black
