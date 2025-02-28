@@ -19,6 +19,7 @@ class Pick:
         self.MinOdds = pick_dict["MinOdds"] if pick_dict else 0
         self.BetaminicStrategy = pick_dict["BetaminicStrategy"] if pick_dict else ""
 
+    # Para enviarlo mediante HTTP
     def to_dict(self):
         return {
             "Date":self.Date,

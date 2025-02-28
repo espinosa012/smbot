@@ -15,11 +15,6 @@ def get_config_users():
     return users
 
 
-# print(fuzz_helper.get_ratio("Maastricht Den Haag", "MVV Maastricht ADO Den Haag"))
-# print(fuzz_helper.get_ratio("LASK SK Rapid", "LASK SK Rapid Wien"))
-# print(fuzz_helper.get_ratio("Portland Timbers Vancouver Whitecaps", "Portland Timbers Vancouver Whitecaps FC"))
-# print(fuzz_helper.get_partial_ratio("Watford Luton", "Watford Luton Town"))
-
 bot = SMBot()
 pick = Pick()
 pick.Event = "Real Sociedad - Real Madrid"
@@ -28,7 +23,6 @@ pick.Bet = {"Market":"1X2", "Selection":"A"}
 pick.MinOdds = 1.8
 bot.place_bet(Bet(pick, get_config_users()[1], 1))
 bot.quit()
-
 
 # if __name__ == "__main__":
 #     reader = MailReader()
