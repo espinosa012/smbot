@@ -44,12 +44,23 @@ class MailReader:
         self.Connection.login(self.Email, self.Password)
 
     # Reading messages
+    def retrieve_inbox_messages(self) -> list:
+        # TODO: UNTESTED. la idea es usarlo para tomar los mensajes sin necesidad de ponerlo a escuchar, hacerlo una única vez
+        # No previous connection required
+        self.connect()
+        current_gmail_messages : list = []
+        for _id in self.get_current_message_ids():
+            msg_obj : Message = self.get_message_by_id(_id)
+            if bool(msg_obj): current_gmail_messages.append(GmailMessage(msg_obj))
+        return current_gmail_messages
+
+
     def get_current_message_ids(self) -> list:
         """ Devuelve las ids de los mensajes del filtro 'Filter', por defecto ALL"""
         # noinspection PyTypeChecker
         return self.Connection.uid("search", None, self.Filter)[1][0].split()
 
-    def get_message_by_id(self, uid: int):
+    def get_message_by_id(self, uid: int) -> Message:
         """ Devuelve el mensaje (mailbox.Message) con id única igual a uid """
         try:
             # noinspection PyTypeChecker
@@ -61,10 +72,12 @@ class MailReader:
             print(e)  # TODO: al logger
         return None
 
-    def get_new_messages_ids(self, already_processed_ids: list):
+    def get_new_messages_ids(self, already_processed_ids: list = None):
         """ Devuelve la lista de ids únicas correspondientes a los mensajes del MailBox que aún no hayan sido procesados."""
-        new_messages_ids: list = list(set(self.get_current_message_ids()) - set(already_processed_ids))
-        if new_messages_ids:
+        new_messages_ids: list = []
+        # if bool(already_processed_ids): new_messages_ids = list(set(self.get_current_message_ids()) - set(already_processed_ids))
+        new_messages_ids = list(set(self.get_current_message_ids()) - set(already_processed_ids))
+        if len(new_messages_ids) != 0:
             new_messages_ids.sort()
             pass  # TODO: indicar en logger la llegada de nuevos mensajes
         return new_messages_ids
@@ -79,7 +92,8 @@ class MailReader:
         self.IsWatching = True
         self.Connection.select(self.MailBox)
         processed_ids: list = []
-        if not process_previous_messages: processed_ids = self.get_current_message_ids()
+        # if not process_previous_messages: processed_ids = self.get_current_message_ids()
+        print(list(set(self.get_current_message_ids()) - set(processed_ids)))
         while self.IsWatching:
             self.Connection.select(self.MailBox)
             # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando

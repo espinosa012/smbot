@@ -175,7 +175,10 @@ def place_bet(driver : uc.Chrome, bet : Bet):
 
 
 def click_selection(driver : uc.Chrome, participants : list, bet : dict):
-    sel_util.selenium_click(driver, get_selection_xpath_by_event_and_bet(driver, participants, bet))
+    selection_xpath : str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
+    sel_util.wait_element_clickable(driver, selection_xpath)
+    sel_util.random_wait(0.8, 1.5)
+    sel_util.selenium_click(driver, selection_xpath)
 
 def click_best_odds(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
@@ -260,7 +263,7 @@ def get_favourite_event_row_xpath(driver : uc.Chrome, participants : list) -> st
 def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry : bool = False) -> None:
     try:
         sel_util.wait_element_clickable(driver, pom.FAVOURITE_EVENT_ICON, 5)
-        sel_util.random_wait(0.3, 0.8)
+        sel_util.random_wait(0.85, 1.5)
         sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, participants) + pom.FAVOURITE_EVENT_ICON)
         sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, participants))
         sel_util.wait_element_visible(driver, f"{pom.FAVOURITES_SECTION_TBODY}")

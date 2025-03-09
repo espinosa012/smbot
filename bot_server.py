@@ -51,7 +51,7 @@ def logs():
 def process_pick():
     pick : Pick = get_request_pick(request)
     # almacenamos el pick en la base de datos
-    db.insert_pick(pick)
+    # db.insert_pick(pick)
     # TODO: notificamos la llegada de un nuevo pick
     pass
     # for user in db.get_active_users():
@@ -75,8 +75,5 @@ def get_config_users():
         users.append(User(user_dict["url"], user_dict["username"], user_dict["password"], user_dict["default_stake"], user_dict["active"]))
     return users
 
-
-
-
 if __name__ == '__main__':
-    app.run(host="0.0.0.0")
+    app.run(host="localhost")

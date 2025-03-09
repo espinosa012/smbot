@@ -11,6 +11,9 @@ class GmailMessage:
     MessageHtml : str
 
     def __init__(self, message_obj):
+        if message_obj is None:
+            raise Exception("Cannot create a GmailMessage object from a void Message.") # TODO: mejorar
+
         self.MessageObj = message_obj
         self.set_message_values()
 
