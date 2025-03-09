@@ -52,6 +52,8 @@ def search_event_in_search_modal_and_get_most_likely_ratio(driver: uc.Chrome, pa
     away_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[1], participants)  # calidad del mejor resultado obtenido introduciendo solo el away
     if away_max_ratio >= confidence_ration: return event_max_ratio
 
+    # TODO: conversión QPR a Queens Park Rangers, Din. a Dinamo, etc (si no se encuentra)
+
     # Buscamos con qué string obtenemos el mejor resultado
     max_ratio : float = max(event_max_ratio, max(home_max_ratio, away_max_ratio))
     # TODO: es poco eficiente, calculamos el ratio 2 veces

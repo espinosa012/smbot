@@ -93,7 +93,6 @@ class MailReader:
         self.Connection.select(self.MailBox)
         processed_ids: list = []
         # if not process_previous_messages: processed_ids = self.get_current_message_ids()
-        print(list(set(self.get_current_message_ids()) - set(processed_ids)))
         while self.IsWatching:
             self.Connection.select(self.MailBox)
             # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
