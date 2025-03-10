@@ -1,6 +1,7 @@
 class Pick:
     # Formato Pick de Betaminic
     Date : str
+    Time : str
     Event : str
     Participants : list = []    # TODO: podría llamarse ParticipantNames
     Bet : dict = {} # {market, selection}
@@ -12,6 +13,7 @@ class Pick:
     def __init__(self, pick_dict : dict = None):
         self.UID = pick_dict["UID"] if pick_dict else -1
         self.Date = pick_dict["Date"] if pick_dict else ""
+        self.Time = pick_dict["Date"] if pick_dict else ""
         self.Event = pick_dict["Event"] if pick_dict else ""
         self.Participants = pick_dict["Participants"] if pick_dict else []
         self.WebParticipantNames = pick_dict["WebParticipantNames"] if pick_dict else []
@@ -23,6 +25,7 @@ class Pick:
     def to_dict(self):
         return {
             "Date":self.Date,
+            "Time":self.Time,
             "Event":self.Event,
             "Participants":self.Participants,
             "WebParticipantNames":self.WebParticipantNames,

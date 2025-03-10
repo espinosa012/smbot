@@ -3,6 +3,9 @@ LOGIN_USERNAME = "//input[@data-testid='username']"
 LOGIN_PASSWORD = "//input[@data-testid='password']"
 LOGIN_BUTTON = "//button[@data-testid='submit']"
 
+# Bank
+CURRENT_BANK = "//span[@class='currency']/span[2]"
+
 # Announce modal
 ANNOUNCE_MODAL = "//div[contains(@class, 'announcementContentContainer')]/ancestor::div[contains(@class, 'modalBody')]"
 CLOSE_ANNOUNCE_MODAL_BUTTON = "//button[contains(@class, 'styles_button')]" # respecto del modal ANNOUNCE_MODAL
@@ -45,8 +48,16 @@ PLACER_MODAL_DIV = "//div[@id='placer']/div[contains(@class, 'draggable') and no
 CLOSE_PLACER_MODAL_DIV = "//div[contains(@class, 'Close')]"  # RESPECTO DE PLACER_MODAL_DIV
 STAKE_INPUT = "//input[contains(@class, 'stake-input')]"
 PLACE_BET_BUTTON = "//button[contains(@class, 'placeButton')]"
+# Odds options
 BEST_ODDS_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][1]/descendant::span[contains(@class, '_price_')]"
 BEST_ODDS_MAX_STAKE_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][1]/descendant::span[contains(@class, '_stake_')]"
+AVERAGE_ODDS_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][2]/descendant::span[contains(@class, '_price_')]"
+AVERAGE_ODDS_MAX_STAKE_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][2]/descendant::span[contains(@class, '_stake_')]"
+TOTAL_ODDS_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][3]/descendant::span[contains(@class, '_price_')]"
+TOTAL_ODDS_MAX_STAKE_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][3]/descendant::span[contains(@class, '_stake_')]"
+AVAILABLE_ODDS = "//div[contains(@class, 'price back styles_bookieAccountPrice')]" # dentro del placer modal
+
+
 BOOKIE_PRICE_ROW = "//div[contains(@class, 'bookieAccountPrices')]"
 PLACED_ODDS_INPUT = "//input[contains(@class, 'price-input')]"
 

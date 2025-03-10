@@ -22,6 +22,7 @@ def index():
 
 @app.route('/watch', methods=['GET'])
 def watch():
+    # TODO: cambiar. nos conectamos cada x tiempo (periodo largo) y comprobamos los mensajes nuevos
     mail_reader.connect()
     print("Mail reader connected.")  # TODO: al logger
     if not mail_reader.IsWatching:
@@ -54,6 +55,19 @@ def process_pick():
     # db.insert_pick(pick)
     # TODO: notificamos la llegada de un nuevo pick
     pass
+    # Colocamos el pick secuencialmente para cada usuario
+    place_pick(pick)
+
+    return "ok"
+
+def schedule_pick(pick : Pick):
+    # TODO: En función de la estrategia, se planifica la colocación para una determinada hora.
+    # para todas las estrategias excepto Ready03, colocamos el pick unos 35 o 40 minutos antes del evento (mirando date y time del pick).
+    # si ha pasado ese tiempo, la colocamos inmediatamente (es decir, se planifica para dentro de unos segundos)
+    pass
+
+def place_pick(pick : Pick):
+    # TODO: si se produce error en la colocación, deberíamos devolver False
     # for user in db.get_active_users():
     # for user in [get_config_users()[1]]:
     for user in [u for u in get_config_users() if u.IsActive]:
@@ -62,8 +76,8 @@ def process_pick():
         bot = SMBot()
         bot.place_bet(bet)  # TODO: gestionar excepción aquí
         bot.quit()
+        print("------------------------------------------------")
         # db.insert_bet(bet)    #TODO probar
-    return "ok"
 
 def get_request_pick(req) -> Pick:
     return Pick(pick_dict=json.loads(req.data))
@@ -75,5 +89,7 @@ def get_config_users():
         users.append(User(user_dict["url"], user_dict["username"], user_dict["password"], user_dict["default_stake"], user_dict["active"]))
     return users
 
+# TODO: parámetros de lanzamiento: headless, procesar mensajes previos de la bandeja de entrada
+
 if __name__ == '__main__':
-    app.run(host="localhost")
+    app.run(host="0.0.0.0", debug = True)

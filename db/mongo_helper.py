@@ -37,3 +37,7 @@ def get_active_users() -> list:
     for u in user_coll.find({"active":True}):
         pass    # TODO: formamos el User a partir del documento
     return active_users
+
+def save_image() -> None:
+    # TODO
+    pass

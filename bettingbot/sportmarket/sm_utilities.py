@@ -48,9 +48,9 @@ def search_event_in_search_modal_and_get_most_likely_ratio(driver: uc.Chrome, pa
     event_max_ratio : float = get_search_result_most_likely_ratio(driver, str.join(" ", participants), participants) # calidad del mejor resultado obtenido introduciendo los dos
     if event_max_ratio >= confidence_ration: return event_max_ratio
     home_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[0], participants)
-    if home_max_ratio >= confidence_ration: return event_max_ratio
+    if home_max_ratio >= confidence_ration: return home_max_ratio
     away_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[1], participants)  # calidad del mejor resultado obtenido introduciendo solo el away
-    if away_max_ratio >= confidence_ration: return event_max_ratio
+    if away_max_ratio >= confidence_ration: return away_max_ratio
 
     # TODO: conversión QPR a Queens Park Rangers, Din. a Dinamo, etc (si no se encuentra)
 
@@ -161,7 +161,7 @@ def place_bet(driver : uc.Chrome, bet : Bet):
     try:
         click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
         # seleccionar la cuota
-        click_best_odds(driver)
+        click_selection_odds(driver)
         # tomar valor de la cuota colocada
         bet.PlacedOdd = get_placed_odds(driver)
         # mandar stake y clic en apostar
@@ -178,13 +178,20 @@ def place_bet(driver : uc.Chrome, bet : Bet):
 
 def click_selection(driver : uc.Chrome, participants : list, bet : dict):
     selection_xpath : str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
+    #
     sel_util.wait_element_clickable(driver, selection_xpath)
     sel_util.random_wait(0.8, 1.5)
     sel_util.selenium_click(driver, selection_xpath)
 
-def click_best_odds(driver : uc.Chrome):
+def click_selection_odds(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
-    # TODO: me falta entenderlo bien, la cuota máxima puede estar limitada por el stake
+
+    # TODO: leer los valores de las cuotas disponibles y tomar uno que esté unos 15-20 cent por debajo del máximo.
+    # también disponemos del valor mínimo y el promedio. Podríamos establecer ciertas normas: si la diferencia entre
+    # el máximo y el mínimo es inferior a X (0.2), colocamos el mínimo. Si no, podemos analizar las cuotas disponibles
+    # y decidir (eliminar valores extremos, colocar a mano cierto valor para la cuota, etc)
+
+    # TODO: crear enum ODDS_STRATEGY: promedio, máximo, mínimo, alguno de los anteriores +- lo que sea, etc
     sel_util.selenium_click(driver, pom.PLACER_MODAL_DIV + pom.BEST_ODDS_SPAN)
     time.sleep(random.uniform(0.3, 0.6))
 
@@ -283,4 +290,4 @@ def close_footer(driver : uc.Chrome):
         sel_util.wait_element_invisible(driver, f"{pom.EXPANDED_BET_BAR_FOOTER_DIV}", 3)
         sel_util.random_wait(0.5, 0.8)
     except Exception as e:
-        print(f"Exception closing footer> {e}") # TODO: al log
+        print(f"Error closing footer: {e}") # TODO: al log

@@ -28,6 +28,10 @@ class SMBot:
     def quit(self):
         self.driver.quit()
 
+    def save_screenshot(self, path : str):
+        # TODO
+        self.driver.save_screenshot(path)
+
     # SportMarket/Betinasia black
     def place_bet(self, bet: Bet, check_min_odds : bool = False) -> bool:
         # TODO: es importante gestionar las excepciones y afectar a los campos de Bet
@@ -35,7 +39,7 @@ class SMBot:
             self.get_driver().get(bet.User.Url)
             # iniciar sesión
             if not betinasia.login(self.driver, bet.User.Username, bet.User.Password):  # tODO: pasarle un parámetro retry
-                print(f"Error logging in for user: {bet.User.Username} ({bet.User.Url})")   # TODO: logger
+                print(f"Error logging in for user: {bet.User.Username} ({bet.User.Url}) [{bet.Pick.Event} - {bet.Pick.Bet['Selection']}]")   # TODO: logger
                 bet.IsPlaced = False
                 bet.PlacingError = "Error logging in"  # TODO: usar enum
                 return False
@@ -44,8 +48,9 @@ class SMBot:
             betinasia.close_footer(self.driver)
             # buscar el evento
             event_found : bool = betinasia.search_event(self.driver, bet.Pick)
+            # TODO: error searching event
             if not event_found:
-                print(f"Event not found: {bet.Pick.Event}") # TODO: logger
+                print(f"Event not found: {bet.Pick.Event} ({bet.Pick.Bet['Selection']})") # TODO: logger
                 bet.IsPlaced = False
                 bet.PlacingError = "Event not found" # TODO: usar enum
                 return False
@@ -58,6 +63,7 @@ class SMBot:
                 bet.PlacingError = "Odds above minimum"  # TODO: usar enum
                 return False
 
+            # TODO: error placing pick
             bet_placed_ok : bool = betinasia.place_bet(self.driver, bet)
             bet.IsPlaced = bet_placed_ok
 

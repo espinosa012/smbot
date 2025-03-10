@@ -11,7 +11,8 @@ def get_betaminic_picks_from_message(message : GmailMessage) -> list:
     for ul in soup.find_all("ul"):
         pick: Pick = Pick()
         values = [t.strip() for t in ul.text.strip().split("=09")]
-        pick.Date = f"{values[0].split(":")[1].strip()} {values[1].split("):")[1].strip()}"
+        pick.Date = f"{values[0].split(":")[1].strip()}"
+        pick.Time = f"{values[1].split("):")[1].strip()}"
         pick.Event = values[4].split(":")[1].strip()
         pick.Participants = [p.strip() for p in pick.Event.split(" - ")]
         set_betaminic_pick_market(pick, pick.Participants, values[5].strip().split(":")[1].strip())
