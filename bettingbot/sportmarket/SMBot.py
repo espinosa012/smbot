@@ -18,7 +18,7 @@ class SMBot:
 
     # Config
     def load_driver(self):
-        self.driver = _selenium.get_driver(True)
+        self.driver = _selenium.get_driver()
 
     def get_driver(self):
         if not self.driver:
