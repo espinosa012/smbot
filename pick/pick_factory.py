@@ -5,7 +5,7 @@ from mail.gmail_message import GmailMessage
 
 
 # BETAMINIC
-def get_betaminic_picks_from_message(message : GmailMessage) -> list:
+def get_betaminic_picks_from_message(message: GmailMessage) -> list:
     message_picks: list = []
     soup = BeautifulSoup(message.MessageHtml, 'html.parser')
     for ul in soup.find_all("ul"):
@@ -23,8 +23,10 @@ def get_betaminic_picks_from_message(message : GmailMessage) -> list:
 
     return message_picks
 
+
 def set_betaminic_pick_market(pick: Pick, participants: list, message_bet_string: str):
-    if message_bet_string in participants or "empate" in message_bet_string.lower():
+    # TODO: mover de aquí los flags
+    if message_bet_string in participants or ("empate" in message_bet_string.lower() and "(empate apuesta no v=e1lida)" not in message_bet_string.lower()):
         pick.Bet["Market"] = "1X2"
         if "empate" in message_bet_string.lower():
             pick.Bet["Selection"] = "D"
@@ -32,10 +34,15 @@ def set_betaminic_pick_market(pick: Pick, participants: list, message_bet_string
             pick.Bet["Selection"] = "H"
         else:
             pick.Bet["Selection"] = "A"
-    elif "+" in message_bet_string.lower() or "-" in message_bet_string.lower():
+    elif "+" in message_bet_string.lower() or "-" in message_bet_string.lower() or "(empate apuesta no v=e1lida)" in message_bet_string.lower():
         pick.Bet["Market"] = "AH"
-    elif (
-            "m=e1s " in message_bet_string.lower() or "menos " in message_bet_string.lower()) and " goles" in message_bet_string.lower():
+        if "(empate apuesta no v=e1lida)" in message_bet_string.lower():
+            if " local " in message_bet_string.lower():
+                pick.Bet["Selection"] = "HOME +0"  # TODO: probar
+            if " visitante " in message_bet_string.lower():
+                pick.Bet["Selection"] = "AWAY +0"
+
+    elif ("m=e1s " in message_bet_string.lower() or "menos " in message_bet_string.lower()) and " goles" in message_bet_string.lower():
         pick.Bet["Market"] = "TG"
         if "m=e1s " in message_bet_string.lower():
             pick.Bet["Selection"] = f"OVER {message_bet_string.lower().replace("m=e1s ", "")
@@ -44,6 +51,10 @@ def set_betaminic_pick_market(pick: Pick, participants: list, message_bet_string
             pick.Bet["Selection"] = f"UNDER {message_bet_string.lower().replace("menos ", "")
             .replace(" goles", "").strip()}"
 
-def get_betaminic_strategy(message_subject : str):
-    return message_subject.split(" Estrategia ")[1].replace('"', "").replace("\r\n" ,"").strip()
+# TODO
+def is_betaminic_1x2_pick(message_bet_string: str, participants: list):
+    return message_bet_string in participants or ("empate" in message_bet_string.lower())
 
+
+def get_betaminic_strategy(message_subject: str):
+    return message_subject.split(" Estrategia ")[1].replace('"', "").replace("\r\n", "").strip()

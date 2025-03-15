@@ -1,4 +1,6 @@
 import undetected_chromedriver as uc
+from selenium.webdriver.remote.webelement import WebElement
+
 from entity.bet.bet import Bet
 from entity.pick.pick import Pick
 from fuzz import fuzz_helper
@@ -44,7 +46,7 @@ def open_search_modal(driver: uc.Chrome, retry : bool) -> None:
 
 def search_event_in_search_modal_and_get_most_likely_ratio(driver: uc.Chrome, participants : list) -> float:
     # Deja la búsqueda hecha en el modal y devuelve el mejor ratio encontrado
-    confidence_ration : float = 91  # TODO: a config
+    confidence_ration : float = 90.1  # TODO: a config
     event_max_ratio : float = get_search_result_most_likely_ratio(driver, str.join(" ", participants), participants) # calidad del mejor resultado obtenido introduciendo los dos
     if event_max_ratio >= confidence_ration: return event_max_ratio
     home_max_ratio : float = get_search_result_most_likely_ratio(driver, participants[0], participants)
@@ -175,13 +177,14 @@ def place_bet(driver : uc.Chrome, bet : Bet):
         print(f"Error placing bet for user {bet.User.Username}: {e}")
         return False
 
-
 def click_selection(driver : uc.Chrome, participants : list, bet : dict):
-    selection_xpath : str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
-    #
-    sel_util.wait_element_clickable(driver, selection_xpath)
-    sel_util.random_wait(0.8, 1.5)
-    sel_util.selenium_click(driver, selection_xpath)
+    if is_asian_selection:
+        click_asian_selection(driver, participants, bet)
+    else:
+        selection_xpath : str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
+        sel_util.wait_element_clickable(driver, selection_xpath)
+        sel_util.random_wait(0.8, 1.5)
+        sel_util.selenium_click(driver, selection_xpath)
 
 def click_selection_odds(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
@@ -227,6 +230,7 @@ def close_placer_modal(driver : uc.Chrome):
 
 # ODDS
 def check_odds(driver: uc.Chrome, participants: list, min_odds: float, bet: dict) -> bool:
+    # TODO: cambiar para incluir a los asiáticos
     return get_odds(driver, participants, bet) >= min_odds
 
 def get_odds(driver: uc.Chrome, participants: list, bet: dict) -> float:
@@ -236,19 +240,23 @@ def get_odds(driver: uc.Chrome, participants: list, bet: dict) -> float:
         return float(bet_web_element.text)
     return 0    # TODO: informar por logger
 
+# SELECTION
+def get_favourite_event_row_xpath(driver : uc.Chrome, participants : list) -> str:
+    event_row_xpath = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR
+    event_rows = sel_util.find_elements_by_xpath(driver, event_row_xpath)
+    if event_rows:
+        for elem in event_rows:
+            if participants[0] in elem.text and participants[1] in elem.text:
+                return f"{event_row_xpath}[{event_rows.index(elem) + 1}]"
+    return ""   # TODO: generar excepción
+
 def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, participants : list, bet : dict) -> str | None:
     event_row_xpath: str = get_favourite_event_row_xpath(driver, participants)
-    # event_row_xpath: str = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR  # TODO: cuidado
     if bet["Market"] in ["1X2", "1x2"]:
-        if bet["Selection"] == "H":
-                return event_row_xpath + pom.EVENT_SELECTION_1X2_HOME_TD
-        if bet["Selection"] == "D":
-                return event_row_xpath + pom.EVENT_SELECTION_1X2_DRAW_TD
-        if bet["Selection"] == "A":
-                return event_row_xpath + pom.EVENT_SELECTION_1X2_AWAY_TD
+        return event_row_xpath + get_1x2_selection_xpath(bet)
     if bet["Market"] in ["TG"]:
+        sel_util.selenium_click(driver, event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_VALUE)
         if "OVER" in bet["Selection"]:
-            # TODO: check value
             return event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_OVER_TD
         if "UNDER" in bet["Selection"]:
             return event_row_xpath + pom.EVENT_SELECTION_TOTAL_GOALS_UNDER_TD
@@ -260,15 +268,84 @@ def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, participants : list
     # TODO: enum de mercados y selections
     return ""
 
-def get_favourite_event_row_xpath(driver : uc.Chrome, participants : list) -> str:
-    event_row_xpath = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_ROW_TR
-    event_rows = sel_util.find_elements_by_xpath(driver, event_row_xpath)
-    if event_rows:
-        for elem in event_rows:
-            if participants[0] in elem.text and participants[1] in elem.text:
-                return f"{event_row_xpath}[{event_rows.index(elem) + 1}]"
-    return ""   # TODO: generar excepción
+# TODO
+def click_asian_selection(driver : uc.Chrome, participants : list, bet : dict):
+    # cuando el mercado sea de handicap, establecemos la selección a elegir antes de clicar la selección
+    # TODO: meter loggers
+    value_text = get_asian_selection_value_text(bet)
 
+    # TODO: comprobar antes si el que se muestra por defecto es el del pick y en caso afirmativo, return
+    sel_util.random_wait(0.25, 0.75)
+    sel_util.selenium_click(driver,
+                            get_favourite_event_row_xpath(driver, participants) + pom.EVENT_SELECTION_AH_VALUE)
+    sel_util.random_wait(0.5, 0.8)
+    sel_util.wait_element_clickable(driver, pom.FAVOURITES_SECTION_TBODY + pom.EVENT_SELECTION_AH_VALUE)
+    sel_util.random_wait(0.2, 0.6)
+    # TODO diferenciar entre mercados asiáticos
+    selection_value_td : WebElement = sel_util.find_element_by_text(driver, get_asian_selection_value_td_xpath(bet), value_text)
+    if selection_value_td is not None:
+        # TODO método para seleccionar el td en función de si es OVER o UNDER
+        target_xpath : str = get_asian_odds_xpath(bet)
+        target_index : int = sel_util.find_elements_by_xpath(driver, get_asian_selection_value_td_xpath(bet)).index(selection_value_td)
+        sel_util.random_wait(0.4, 0.9)
+        sel_util.find_elements_by_xpath(driver, target_xpath)[target_index].click()
+
+def get_asian_selection_value_text(bet : dict):
+    asian_selection_value_text : str = ""
+    if bet["Market"] == "AH":
+        asian_selection_value_text = bet["Selection"]
+    if bet["Market"] == "TG":
+        asian_selection_value_text = bet["Selection"].split(" ")[1].strip().replace(".", ",")
+    return asian_selection_value_text
+
+def get_asian_odds_xpath(bet : dict) -> str:
+    asian_odds_xpath = ""
+    if bet["Market"] == "TG": asian_odds_xpath = get_total_goals_odds_xpath(bet)
+    if bet["Market"] == "AH": asian_odds_xpath = get_ah_odds_xpath(bet)
+    return asian_odds_xpath
+
+def get_total_goals_odds_xpath(bet : dict) -> str:
+    target_xpath: str = ""
+    if "OVER" in bet["Selection"]:
+        target_xpath = (pom.FAVOURITES_SECTION_TBODY + pom.EVENT_SELECTION_TOTAL_GOALS_VALUE
+                        + pom.EVENT_SELECTION_EXPANDED_ASIAN_OVER_ODD)
+    if "UNDER" in bet["Selection"]:
+        target_xpath = (pom.FAVOURITES_SECTION_TBODY + pom.EVENT_SELECTION_TOTAL_GOALS_VALUE
+                        + pom.EVENT_SELECTION_EXPANDED_ASIAN_UNDER_ODD)
+    return target_xpath
+
+def get_ah_odds_xpath(bet : dict) -> str:
+    target_xpath: str = ""
+    asian_selection_value_td_xpath : str = get_asian_selection_value_td_xpath(bet)
+    if "HOME" in bet["Selection"]:
+        target_xpath = (asian_selection_value_td_xpath
+                        + pom.EVENT_SELECTION_EXPANDED_ASIAN_OVER_ODD)
+    if "AWAY" in bet["Selection"]:
+        target_xpath = (asian_selection_value_td_xpath
+                        + pom.EVENT_SELECTION_EXPANDED_ASIAN_UNDER_ODD)
+    return target_xpath
+
+
+def get_asian_selection_value_td_xpath(bet : dict) -> str:
+    selection_value_td_xpath : str = ""
+    if bet["Market"] == "TG":
+        selection_value_td_xpath = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_SELECTION_TOTAL_GOALS_VALUE
+    if bet["Market"] == "AH":
+        selection_value_td_xpath = pom.FAVOURITES_SECTION_TBODY + pom.EVENT_SELECTION_AH_VALUE
+    return selection_value_td_xpath
+
+def is_asian_selection(bet : dict):
+    return bet["Market"] not in ["TG", "AH"]
+
+def get_1x2_selection_xpath(bet : dict) -> str | None:
+    if bet["Selection"] == "H":
+        return pom.EVENT_SELECTION_1X2_HOME_TD
+    if bet["Selection"] == "D":
+        return pom.EVENT_SELECTION_1X2_DRAW_TD
+    if bet["Selection"] == "A":
+        return pom.EVENT_SELECTION_1X2_AWAY_TD
+
+# ADDITIONAL METHODS
 def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry : bool = False) -> None:
     try:
         sel_util.wait_element_clickable(driver, pom.FAVOURITE_EVENT_ICON, 5)

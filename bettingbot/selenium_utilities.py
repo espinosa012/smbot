@@ -68,7 +68,13 @@ def find_elements_by_xpath(driver :uc.Chrome, xpath : str, timeout : int = 10) -
 
 def find_element_by_partial_text(driver : uc.Chrome, xpath : str, text : str) -> WebElement | None:
     for elem in driver.find_elements(By.XPATH, xpath):
-        if text in elem.get_attribute("text"):  
+        if elem.text is not None and text in elem.text:
+            return elem
+    return None # TODO: untested
+
+def find_element_by_text(driver : uc.Chrome, xpath : str, text : str) -> WebElement | None:
+    for elem in driver.find_elements(By.XPATH, xpath):
+        if elem.text is not None and text in elem.text.strip():
             return elem
     return None # TODO: untested
 

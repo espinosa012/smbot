@@ -36,12 +36,18 @@ EVENT_SELECTION_1X2_DRAW_TD = "//td[@data-bet-group='wdw' and @data-outcome='d']
 EVENT_SELECTION_1X2_AWAY_TD = "//td[@data-bet-group='wdw' and @data-outcome='a']"
 
 # Market Total Goals
+EVENT_SELECTION_TOTAL_GOALS_VALUE = "//td[contains(@class, 'handicap-cell')][2]"
 EVENT_SELECTION_TOTAL_GOALS_OVER_TD = "//td[@data-bet-group='ahou' and @data-outcome='over']"
 EVENT_SELECTION_TOTAL_GOALS_UNDER_TD = "//td[@data-bet-group='ahou' and @data-outcome='under']"
 
 # Market Asian Handicap
+EVENT_SELECTION_AH_VALUE = "//td[contains(@class, 'handicap-cell')][1]"
 EVENT_SELECTION_AH_HOME_TD = "//td[@data-bet-group='ah' and @data-outcome='h']"
 EVENT_SELECTION_AH_AWAY_TD = "//td[@data-bet-group='ah' and @data-outcome='a']"
+
+EVENT_SELECTION_EXPANDED_ASIAN_OVER_ODD = "/following-sibling::td[1]"    # respecto de EVENT_SELECTION_TOTAL_GOALS_VALUE o EVENT_SELECTION_AH_VALUE
+EVENT_SELECTION_EXPANDED_ASIAN_UNDER_ODD = "/following-sibling::td[2]"    # respecto de EVENT_SELECTION_TOTAL_GOALS_VALUE o EVENT_SELECTION_AH_VALUE
+
 
 # Placer modal
 PLACER_MODAL_DIV = "//div[@id='placer']/div[contains(@class, 'draggable') and not(contains(@class, 'Blocker'))]"

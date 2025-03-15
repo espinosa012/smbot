@@ -17,11 +17,12 @@ def get_config_users():
 
 bot = SMBot()
 pick = Pick()
-pick.Event = "Real Sociedad - Real Madrid"
-pick.Participants = ["Real Sociedad", "Real Madrid"]
-pick.Bet = {"Market":"1X2", "Selection":"A"}
+pick.Event = "Betis - Sevilla"
+pick.Participants = ["Betis", "Sevilla"]
+pick.Bet = {"Market":"TG", "Selection":"OVER 2.5"}
+# pick.Bet = {"Market":"1X2", "Selection":"H"}
 pick.MinOdds = 1.8
-bot.place_bet(Bet(pick, get_config_users()[0], 1))
+bot.place_bet(Bet(pick, get_config_users()[1], 0.6))
 bot.quit()
 
 # if __name__ == "__main__":

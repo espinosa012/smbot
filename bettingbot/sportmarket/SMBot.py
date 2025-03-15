@@ -18,7 +18,7 @@ class SMBot:
 
     # Config
     def load_driver(self):
-        self.driver = _selenium.get_driver()
+        self.driver = _selenium.get_driver(False)
 
     def get_driver(self):
         if not self.driver:
@@ -56,6 +56,7 @@ class SMBot:
                 return False
 
             # comprobar la cuota y apostar si procede (será configurable por usuario)
+            # TODO: las cuotas de los asiáticos se miran de otra forma. Hay que cambiar la manera. Podríamos comprobarlo dentro del modal de colocación
             if check_min_odds and not betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames,
                                                            bet.Pick.MinOdds,bet.Pick.Bet):
                 print(f"Odds above minimum: {bet.Pick.Event}")
