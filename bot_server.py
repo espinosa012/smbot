@@ -2,7 +2,6 @@ import json
 import os
 import pickle
 import threading
-import time
 
 import requests
 from flask import Flask, request
@@ -62,7 +61,6 @@ def process_pick():
     pass
     # Colocamos el pick secuencialmente para cada usuario
     place_pick(pick)
-
     return "ok"
 
 
@@ -86,10 +84,8 @@ def place_pick(pick: Pick):
         print("------------------------------------------------")
         # db.insert_bet(bet)    #TODO probar
 
-
 def get_request_pick(req) -> Pick:
     return Pick(pick_dict=json.loads(req.data))
-
 
 def get_config_users():
     users: list = []
