@@ -19,7 +19,7 @@ bot = SMBot(False)
 pick = Pick()
 pick.Event = "Alvarado - Almagro"
 pick.Participants = ["Alvarado", "Almagro"]
-pick.Bet = {"Market":"AH", "Selection":"A +0"}
+pick.Bet = {"Market":"TG", "Selection":"UNDER 2.5"}
 # pick.Bet = {"Market":"1X2", "Selection":"H"}
 pick.MinOdds = 1.8
 bot.place_bet(Bet(pick, get_config_users()[1], 0.6))

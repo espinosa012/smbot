@@ -3,7 +3,6 @@ import os
 import pickle
 import threading
 
-import requests
 from flask import Flask, request
 
 from bettingbot.sportmarket.SMBot import SMBot
@@ -31,26 +30,16 @@ def watch():
         threading.Thread(target=mail_reader.watch, args=([True])).start()
     return "ok"
 
-
-@app.route('/stop-watching', methods=['GET'])
-def stop_watching():
-    print("Mail reader stopped watching.")  # TODO: al logger
-    mail_reader.stop_watching()
-    return "ok"
-
-
 @app.route('/log', methods=['POST'])
 def log():
     # TODO: usar un logger propio
     message: str = pickle.loads(request.data)
     return str(message)
 
-
 @app.route('/logs', methods=['GET'])
 def logs():
     # TODO: para mostrar los mensajes de logs
     pass
-
 
 @app.route('/process-pick', methods=['POST'])
 def process_pick():
@@ -63,13 +52,11 @@ def process_pick():
     place_pick(pick)
     return "ok"
 
-
 def schedule_pick(pick: Pick):
     # TODO: En función de la estrategia, se planifica la colocación para una determinada hora.
     # para todas las estrategias excepto Ready03, colocamos el pick unos 35 o 40 minutos antes del evento (mirando date y time del pick).
     # si ha pasado ese tiempo, la colocamos inmediatamente (es decir, se planifica para dentro de unos segundos)
     pass
-
 
 def place_pick(pick: Pick):
     # TODO: si se produce error en la colocación, deberíamos devolver False
@@ -78,7 +65,7 @@ def place_pick(pick: Pick):
     for user in [u for u in get_config_users() if u.IsActive]:
         bet: Bet = Bet(pick, user, user.DefaultStake)
         print(f"Placing bet for user {user.Username}")  # TODO: al logger
-        bot = SMBot()
+        bot : SMBot = SMBot(True)
         bot.place_bet(bet)  # TODO: gestionar excepción aquí
         bot.quit()
         print("------------------------------------------------")
@@ -95,11 +82,6 @@ def get_config_users():
                           user_dict["active"]))
     return users
 
-
-def start_watching(_host : str, _port : int):
-    print(f"http://{_host}:{_port}/watch")
-    requests.get(f"http://{_host}:{_port}/watch", headers={'Content-Type': 'application/json'})
-
 # TODO: parámetros de lanzamiento: headless, procesar mensajes previos de la bandeja de entrada
 
 
@@ -107,7 +89,4 @@ if __name__ == '__main__':
     host : str = "127.0.0.1"
     port : int = 5000
 
-    # threading.Thread(target=app.run).start()
-    # time.sleep(5)
-    # threading.Thread(target=start_watching, args=([host, port])).start()
     app.run(host=host, port=port, debug=False)

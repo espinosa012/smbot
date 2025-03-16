@@ -61,7 +61,7 @@ AVERAGE_ODDS_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[conta
 AVERAGE_ODDS_MAX_STAKE_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][2]/descendant::span[contains(@class, '_stake_')]"
 TOTAL_ODDS_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][3]/descendant::span[contains(@class, '_price_')]"
 TOTAL_ODDS_MAX_STAKE_SPAN = "//div[contains(@class, 'styles_egg')]/descendant::div[contains(@class, 'styles_chiclet') and not(contains(@class, 'classic'))][3]/descendant::span[contains(@class, '_stake_')]"
-AVAILABLE_ODDS = "//div[contains(@class, 'price back styles_bookieAccountPrice')]" # dentro del placer modal
+AVAILABLE_ODDS_SPAN = "//div[contains(@class, 'price back styles_bookieAccountPrice')]/span[contains(@class, 'styles_price')]" # dentro del placer modal
 
 
 BOOKIE_PRICE_ROW = "//div[contains(@class, 'bookieAccountPrices')]"

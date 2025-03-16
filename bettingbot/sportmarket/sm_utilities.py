@@ -188,6 +188,18 @@ def click_selection(driver : uc.Chrome, participants : list, bet : dict):
 
 def click_selection_odds(driver : uc.Chrome):
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
+    time.sleep(random.uniform(0.3, 0.6))
+    sel_util.wait_element_clickable(driver, pom.PLACER_MODAL_DIV + pom.AVAILABLE_ODDS_SPAN)
+    time.sleep(random.uniform(0.25, 0.5))
+    available_odds_text = [sp.text for sp in sel_util.find_elements_by_xpath(driver, pom.AVAILABLE_ODDS_SPAN)]
+    available_odds_text.sort()
+    available_odds_numeric_value = [float(ao) for ao in available_odds_text]
+
+    max_odds_subtraction = 0.17 # TODO a config
+    target_odds : float = (float(sel_util.find_element_by_xpath(driver, pom.PLACER_MODAL_DIV + pom.BEST_ODDS_SPAN).text)
+                           - max_odds_subtraction) # TODO: a config
+    sel_util.find_element_by_text(driver, pom.AVAILABLE_ODDS_SPAN, available_odds_text[available_odds_numeric_value
+                                  .index(min(available_odds_numeric_value, key=lambda x: abs(x - target_odds)))]).click()
 
     # TODO: leer los valores de las cuotas disponibles y tomar uno que esté unos 15-20 cent por debajo del máximo.
     # también disponemos del valor mínimo y el promedio. Podríamos establecer ciertas normas: si la diferencia entre
