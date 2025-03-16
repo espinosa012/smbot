@@ -178,7 +178,7 @@ def place_bet(driver : uc.Chrome, bet : Bet):
         return False
 
 def click_selection(driver : uc.Chrome, participants : list, bet : dict):
-    if is_asian_selection:
+    if is_asian_selection(bet):
         click_asian_selection(driver, participants, bet)
     else:
         selection_xpath : str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
@@ -335,7 +335,7 @@ def get_asian_selection_value_td_xpath(bet : dict) -> str:
     return selection_value_td_xpath
 
 def is_asian_selection(bet : dict):
-    return bet["Market"] not in ["TG", "AH"]
+    return bet["Market"] in ["TG", "AH"]
 
 def get_1x2_selection_xpath(bet : dict) -> str | None:
     if bet["Selection"] == "H":
