@@ -9,16 +9,15 @@ class SMBot:
     config = {}
     driver = None
 
-    def __init__(self, start_driver : bool = True):
-        self.setup(start_driver)
+    def __init__(self, is_headless : bool = True):
+        self.setup(is_headless)
 
-    def setup(self, start_driver : bool):
-        if start_driver:
-            self.load_driver()
+    def setup(self, is_headless : bool):
+        self.load_driver(is_headless)
 
     # Config
-    def load_driver(self):
-        self.driver = _selenium.get_driver(True)
+    def load_driver(self, is_headless : bool):
+        self.driver = _selenium.get_driver(is_headless)
 
     def get_driver(self):
         if not self.driver:

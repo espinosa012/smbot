@@ -10,14 +10,14 @@ from selenium.common.exceptions import TimeoutException
 
 # TODO: meter logger
 
-def get_driver(headless : bool = False) -> uc.Chrome:
+def get_driver(is_headless : bool = False) -> uc.Chrome:
     chrome_options = uc.ChromeOptions()
     chrome_options.add_argument("--incognito")
-    if headless: chrome_options.add_argument("--headless")
+    if is_headless: chrome_options.add_argument("--headless")
     driver : uc.Chrome = uc.Chrome(options=chrome_options)
     driver.maximize_window()
     driver.execute_script("window.focus();")
-    if headless: driver.execute_cdp_cmd(
+    if is_headless: driver.execute_cdp_cmd(
         "Network.setUserAgentOverride", {"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"}
     )
     driver.implicitly_wait(10)
