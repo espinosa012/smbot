@@ -6,9 +6,10 @@ from mailbox import Message
 
 import requests
 
-from pick import pick_factory
 from entity.pick.pick import Pick
 from mail.gmail_message import GmailMessage
+from pick import pick_factory
+
 
 class MailReader:
     Email: str
@@ -40,20 +41,22 @@ class MailReader:
         return creds["email"], creds["app_password"]
 
     def connect(self):
-        self.Connection = imaplib.IMAP4_SSL("imap.gmail.com")
-        self.Connection.login(self.Email, self.Password)
+        try:
+            self.Connection = imaplib.IMAP4_SSL("imap.gmail.com")
+            self.Connection.login(self.Email, self.Password)
+            self.Connection.select(self.MailBox)
+        except Exception as e:
+            # TODO: gestionar errores de conexión de gmail
+            raise e
 
     # Reading messages
     def retrieve_inbox_messages(self) -> list:
-        # TODO: UNTESTED. la idea es usarlo para tomar los mensajes sin necesidad de ponerlo a escuchar, hacerlo una única vez
-        # No previous connection required
         self.connect()
-        current_gmail_messages : list = []
+        current_gmail_messages: list = []
         for _id in self.get_current_message_ids():
-            msg_obj : Message = self.get_message_by_id(_id)
+            msg_obj: Message = self.get_message_by_id(_id)
             if bool(msg_obj): current_gmail_messages.append(GmailMessage(msg_obj))
         return current_gmail_messages
-
 
     def get_current_message_ids(self) -> list:
         """ Devuelve las ids de los mensajes del filtro 'Filter', por defecto ALL"""
@@ -65,7 +68,7 @@ class MailReader:
         try:
             # noinspection PyTypeChecker
             _type, data = self.Connection.uid("fetch", uid, "(RFC822)")
-            msg_obj : Message = email.message_from_bytes(data[0][1])
+            msg_obj: Message = email.message_from_bytes(data[0][1])
             msg_obj["UID"] = int(uid)
             return msg_obj
         except Exception as e:
@@ -85,12 +88,13 @@ class MailReader:
     def stop_watching(self):
         self.IsWatching = False
 
-    def watch(self, process_previous_messages : bool = False):
+    # TODO: a lo mejor con schedule podemos cambiar el método de escucha y mirar los mensajes cada x tiempo sin usar el while
+    def watch(self, process_previous_messages: bool = False):
         # TODO: gestionar los errores por pérdida de conexión. Reintentar cada x tiempo mientras IsWatching
         """ Se mantiene monitorizando el buzón 'MailBox' (por defecto INBOX) mientras IsWatching es True. Para cada
             conjunto de mensajes recibidos durante el tiempo de pausa, llama al mét odo process_messages"""
         self.IsWatching = True
-        self.Connection.select(self.MailBox)
+        # self.Connection.select(self.MailBox)    # TODO se podrá quitar?
         processed_ids: list = []
         # if not process_previous_messages: processed_ids = self.get_current_message_ids()
         while self.IsWatching:
@@ -98,17 +102,18 @@ class MailReader:
             # actualizamos la lista de ids, si hay alguna nueva, las vamos procesando
             # obtenemos la lista de ids a procesar, que serán las que estén en la bandeja de entrada y no en processed_ids
             new_messages_ids: list = self.get_new_messages_ids(processed_ids)
-            # procesamos las ids no procesadas y lanzamos los picks, con redis o lo que sea.
+            # procesamos las ids no procesadas y lanzamos los picks
             self.process_messages(new_messages_ids, processed_ids)
             time.sleep(self.SleepTime)
 
     def process_messages(self, message_ids: list, already_processed_ids: list):
         """ Procesa un conjunto de mensajes. En cada mensaje puede venir más de un pick"""
         for _id in message_ids:
-            already_processed_ids.append(_id)   # TODO: a lo mejor es mejor que la lista de ids procesadas se defina en el servidor
+            already_processed_ids.append(
+                _id)  # TODO: a lo mejor es mejor que la lista de ids procesadas se defina en el servidor
             self.process_message(self.get_message_by_id(_id))
 
-    def process_message(self, msg_obj : Message):
+    def process_message(self, msg_obj: Message):
         """ Procesa un mensaje individual """
         if msg_obj and self.is_pick_message(msg_obj):
             # si es un mensaje de pick, formamos la lista de objetos picks
@@ -130,9 +135,9 @@ class MailReader:
         try:
             # TODO: parametrizar el endpoint, tomar de configuración o lo que sea.
             response = requests.post(f"{self.get_server_address()}/place-pick", data=json.dumps(pick.to_dict()),
-                          headers={'Content-Type': 'application/json'})
+                                     headers={'Content-Type': 'application/json'})
         except requests.exceptions.ConnectionError as conn_err:
-            print(conn_err) # TODO: error al logger y gestionar bien
+            print(conn_err)  # TODO: error al logger y gestionar bien
 
     @staticmethod
     def is_pick_message(msg: email.message.Message):

@@ -158,12 +158,12 @@ def compute_ratio(pick_participants : list, search_result_event_participants : l
 
 
 # MARKETS
-def place_bet(driver : uc.Chrome, bet : Bet):
+def place_bet(driver : uc.Chrome, bet : Bet, check_odds : bool):
     # clic en la cuota que corresponda
     try:
         click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
         # seleccionar la cuota
-        click_selection_odds(driver)
+        click_selection_odds(driver, check_odds)
         # tomar valor de la cuota colocada
         bet.PlacedOdd = get_placed_odds(driver)
         # mandar stake y clic en apostar
@@ -181,12 +181,10 @@ def click_selection(driver : uc.Chrome, participants : list, bet : dict):
     if is_asian_selection(bet):
         click_asian_selection(driver, participants, bet)
     else:
-        selection_xpath : str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
-        sel_util.wait_element_clickable(driver, selection_xpath)
-        sel_util.random_wait(0.8, 1.5)
-        sel_util.selenium_click(driver, selection_xpath)
+        click_1x2_selection(driver, participants, bet)
 
-def click_selection_odds(driver : uc.Chrome):
+def click_selection_odds(driver : uc.Chrome, check_odds : bool):
+    # TODO: comprobar la cuota según el argumento check_odds
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
     time.sleep(random.uniform(0.3, 0.6))
     sel_util.wait_element_clickable(driver, pom.PLACER_MODAL_DIV + pom.AVAILABLE_ODDS_SPAN)
@@ -207,7 +205,6 @@ def click_selection_odds(driver : uc.Chrome):
     # y decidir (eliminar valores extremos, colocar a mano cierto valor para la cuota, etc)
 
     # TODO: crear enum ODDS_STRATEGY: promedio, máximo, mínimo, alguno de los anteriores +- lo que sea, etc
-    sel_util.selenium_click(driver, pom.PLACER_MODAL_DIV + pom.BEST_ODDS_SPAN)
     time.sleep(random.uniform(0.3, 0.6))
 
 def get_placed_odds(driver : uc.Chrome):
@@ -279,6 +276,13 @@ def get_selection_xpath_by_event_and_bet(driver : uc.Chrome, participants : list
                 return event_row_xpath + pom.EVENT_SELECTION_AH_AWAY_TD
     # TODO: enum de mercados y selections
     return ""
+
+# TODO: llamar desde click_selection
+def click_1x2_selection(driver : uc.Chrome, participants : list, bet : dict):
+    selection_xpath: str = get_selection_xpath_by_event_and_bet(driver, participants, bet)
+    sel_util.wait_element_clickable(driver, selection_xpath)
+    sel_util.random_wait(0.8, 1.5)
+    sel_util.selenium_click(driver, selection_xpath)
 
 # TODO
 def click_asian_selection(driver : uc.Chrome, participants : list, bet : dict):

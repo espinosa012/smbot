@@ -54,17 +54,9 @@ class SMBot:
                 bet.PlacingError = "Event not found" # TODO: usar enum
                 return False
 
-            # comprobar la cuota y apostar si procede (será configurable por usuario)
-            # TODO: las cuotas de los asiáticos se miran de otra forma. Hay que cambiar la manera. Podríamos comprobarlo dentro del modal de colocación
-            if check_min_odds and not betinasia.check_odds(self.driver, bet.Pick.WebParticipantNames,
-                                                           bet.Pick.MinOdds,bet.Pick.Bet):
-                print(f"Odds above minimum: {bet.Pick.Event}")
-                bet.IsPlaced = False
-                bet.PlacingError = "Odds above minimum"  # TODO: usar enum
-                return False
-
             # TODO: error placing pick
-            bet_placed_ok : bool = betinasia.place_bet(self.driver, bet)
+            # comprobar la cuota y apostar si procede (será configurable por usuario)
+            bet_placed_ok : bool = betinasia.place_bet(self.driver, bet, check_min_odds)
             bet.IsPlaced = bet_placed_ok
 
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
