@@ -21,7 +21,7 @@ class SMBot:
 
     def get_driver(self):
         if not self.driver:
-            self.load_driver()
+            self.load_driver() #TODO revisar
         return self.driver
 
     def quit(self):
@@ -43,12 +43,11 @@ class SMBot:
                 bet.PlacingError = "Error logging in"  # TODO: usar enum
                 return False
 
-            # cerrar el panel de Pedidos recientes
-            betinasia.close_footer(self.driver)
             # buscar el evento
-            event_found : bool = betinasia.search_event(self.driver, bet.Pick)
+            # event_found : bool = betinasia.search_event(self.driver, bet.Pick)
             # TODO: error searching event
-            if not event_found:
+            # if not event_found:
+            if not betinasia.search_event(self.driver, bet.Pick):
                 print(f"Event not found: {bet.Pick.Event} ({bet.Pick.Bet['Selection']})") # TODO: logger
                 bet.IsPlaced = False
                 bet.PlacingError = "Event not found" # TODO: usar enum
@@ -56,11 +55,15 @@ class SMBot:
 
             # TODO: error placing pick
             # comprobar la cuota y apostar si procede (será configurable por usuario)
-            bet_placed_ok : bool = betinasia.place_bet(self.driver, bet, check_min_odds)
-            bet.IsPlaced = bet_placed_ok
+            # bet_placed_ok : bool = betinasia.place_bet(self.driver, bet, check_min_odds)
+            bet.IsPlaced = betinasia.place_bet(self.driver, bet, check_min_odds)
 
             betinasia.remove_event_from_favourites(self.driver, bet.Pick.WebParticipantNames, True)  # si falla lo reintentamos
             time.sleep(1)
+            print(f"Bank after betting: {betinasia.get_current_user_bank(self.driver)} Є")
+            # TODO: guardar en db el histórico de banks de los usuarios, junto con la fecha y hora, o que sea un campo de bet, o una entidad nueva, con el valor del bank y la fecha y hora...
+            # cerrar el panel de Pedidos recientes
+            betinasia.close_footer(self.driver)
             return True
 
         except Exception as e:

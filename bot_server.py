@@ -65,7 +65,7 @@ def place_pick(pick: Pick):
     for user in [u for u in get_config_users() if u.IsActive]:
         bet: Bet = Bet(pick, user, user.DefaultStake)
         print(f"Placing bet for user {user.Username}")  # TODO: al logger
-        bot : SMBot = SMBot(True)
+        bot : SMBot = SMBot(False)
         bot.place_bet(bet)  # TODO: gestionar excepción aquí
         bot.quit()
         print("------------------------------------------------")
@@ -86,7 +86,7 @@ def get_config_users():
 
 
 if __name__ == '__main__':
-    host : str = "127.0.0.1"
+    host : str = "0.0.0.0"
     port : int = 5000
 
     app.run(host=host, port=port, debug=False)

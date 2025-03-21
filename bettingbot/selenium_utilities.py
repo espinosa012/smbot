@@ -78,9 +78,12 @@ def find_element_by_text(driver : uc.Chrome, xpath : str, text : str) -> WebElem
             return elem
     return None # TODO: untested
 
+def get_element_text(driver : uc.Chrome, xpath : str):
+    return driver.find_element(By.XPATH, xpath).text
+
 def selenium_click(driver : uc.Chrome, xpath : str, timeout=10) -> None:
     wait_element_clickable(driver, xpath, timeout)
-    time.sleep(random.uniform(0.1, 0.3))
+    random_wait(0.1, 0.3)
     find_element_by_xpath(driver, xpath).click()
 
 def selenium_clear_input(driver : uc.Chrome, xpath : str) -> None:
@@ -98,6 +101,9 @@ def selenium_send_keys(driver : uc.Chrome, xpath : str, value : str) -> None:
 
 def random_wait(_min : float, _max : float):
     time.sleep(random.uniform(_min, _max))
+
+def wait(duration : float):
+    time.sleep(duration)
 
 def save_screenshot(driver : uc.Chrome, filename : str = "screenshot.png"):
     driver.save_screenshot(filename)

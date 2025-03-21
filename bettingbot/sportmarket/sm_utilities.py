@@ -12,19 +12,21 @@ import time
 
 # TODO: loggers por todos lados
 
+# TODO: usar método de espera aleatorio de la utilidad
+
 def login(driver: uc.Chrome, username: str, password: str) -> bool:
     try:
         sel_util.wait_element_clickable(driver, pom.LOGIN_BUTTON)
         sel_util.selenium_send_keys(driver, pom.LOGIN_USERNAME, username)
         sel_util.selenium_send_keys(driver, pom.LOGIN_PASSWORD, password)
         sel_util.selenium_click(driver, pom.LOGIN_BUTTON)
-        time.sleep(random.uniform(0.5, 1))  # TODO: llevar esto y todos los que hay a selenium_utilities
+        sel_util.random_wait(3, 5)
         return sel_util.is_element_present(driver, pom.SEARCH_BUTTON, 20)
     except Exception as e:
         print(f"Error logging in: {e}")
         return False
 
-# SEARCHING EVENT
+# SEARCHING EVENT TODO: sacar de aquí
 def search_event(driver: uc.Chrome, pick : Pick) -> bool:  # true si lo encuentra, false si no
     open_search_modal(driver, True) # con 1 reintento
     ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, pick.Participants)
@@ -143,7 +145,6 @@ def get_search_result_most_likely_ratio(driver : uc.Chrome, searched_term : str,
         max_ratio = max(max_ratio, compute_ratio(participants, search_result_event_participants))
     return max_ratio
 
-# TODO: llevar todos los cálculos del ratio fuera de aquí
 def compute_ratio(pick_participants : list, search_result_event_participants : list) -> float:
     home_ratio: float = fuzz_helper.get_ratio(pick_participants[0].lower(), search_result_event_participants[0].lower())
     away_ratio: float = fuzz_helper.get_ratio(pick_participants[1].lower(), search_result_event_participants[1].lower())
@@ -284,7 +285,6 @@ def click_1x2_selection(driver : uc.Chrome, participants : list, bet : dict):
     sel_util.random_wait(0.8, 1.5)
     sel_util.selenium_click(driver, selection_xpath)
 
-# TODO
 def click_asian_selection(driver : uc.Chrome, participants : list, bet : dict):
     # cuando el mercado sea de handicap, establecemos la selección a elegir antes de clicar la selección
     # TODO: meter loggers
@@ -307,6 +307,7 @@ def click_asian_selection(driver : uc.Chrome, participants : list, bet : dict):
         sel_util.random_wait(0.4, 0.9)
         sel_util.find_elements_by_xpath(driver, target_xpath)[target_index].click()
 
+# TODO: sacar de aquí
 def get_asian_selection_value_text(bet : dict):
     asian_selection_value_text : str = ""
     if bet["Market"] == "AH":
@@ -342,7 +343,6 @@ def get_ah_odds_xpath(bet : dict) -> str:
                         + pom.EVENT_SELECTION_EXPANDED_ASIAN_UNDER_ODD)
     return target_xpath
 
-
 def get_asian_selection_value_td_xpath(bet : dict) -> str:
     selection_value_td_xpath : str = ""
     if bet["Market"] == "TG":
@@ -363,6 +363,14 @@ def get_1x2_selection_xpath(bet : dict) -> str | None:
         return pom.EVENT_SELECTION_1X2_AWAY_TD
 
 # ADDITIONAL METHODS
+def get_current_user_bank(driver : uc.Chrome) -> float | None:
+    try:
+        return float(sel_util.get_element_text(driver, pom.CURRENT_BANK))
+    except Exception as e:
+        # TODO: logger
+        print(f"Error getting user bank ({e})")
+    return None
+
 def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry : bool = False) -> None:
     try:
         sel_util.wait_element_clickable(driver, pom.FAVOURITE_EVENT_ICON, 5)

@@ -21,10 +21,10 @@ bot = SMBot(False)
 pick = Pick()
 pick.Event = "Atletico Madrid - Barcelona"
 pick.Participants = ["Atletico Madrid", "Barcelona"]
-pick.Bet = {"Market":"1X2", "Selection":"D"}
+pick.Bet = {"Market":"1X2", "Selection":"A"}
 # pick.Bet = {"Market":"1X2", "Selection":"H"}
 pick.MinOdds = 1.8
-bot.place_bet(Bet(pick, get_config_users()[2], 0.6))
+bot.place_bet(Bet(pick, get_config_users()[1], 0.6))
 bot.quit()
 
 # if __name__ == "__main__":
