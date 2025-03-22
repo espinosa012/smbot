@@ -14,8 +14,8 @@ def get_betaminic_picks_from_message(message: GmailMessage) -> list:
         pick.Date = f"{values[0].split(":")[1].strip()}"
         pick.Time = f"{values[1].split("):")[1].strip()}"
         pick.Event = values[4].split(":")[1].strip()
-        pick.Participants = get_betaminic_pick_participants(pick.Event)
-        set_betaminic_pick_market_and_selection(pick, pick.Participants, values[5].strip().split(":")[1].strip())
+        pick.ParticipantNames = get_betaminic_pick_participants(pick.Event)
+        set_betaminic_pick_market_and_selection(pick, pick.ParticipantNames, values[5].strip().split(":")[1].strip())
         pick.MinOdds = float(values[6].split(":")[1].strip())
         pick.UID = message.UID
         pick.BetaminicStrategy = get_betaminic_strategy(message.Subject)

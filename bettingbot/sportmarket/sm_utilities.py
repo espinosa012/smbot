@@ -29,7 +29,7 @@ def login(driver: uc.Chrome, username: str, password: str) -> bool:
 # SEARCHING EVENT TODO: sacar de aquí
 def search_event(driver: uc.Chrome, pick : Pick) -> bool:  # true si lo encuentra, false si no
     open_search_modal(driver, True) # con 1 reintento
-    ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, pick.Participants)
+    ratio : float = search_event_in_search_modal_and_get_most_likely_ratio(driver, pick.ParticipantNames)
     minimum_ratio_for_searching_event: float = 70 # TODO a config
     if ratio < minimum_ratio_for_searching_event:
         return False
@@ -70,7 +70,7 @@ def search_event_in_search_modal_and_get_most_likely_ratio(driver: uc.Chrome, pa
 
 def click_best_search_result(driver : uc.Chrome, likely_ratio : float, pick : Pick):
     # hacemos clic en la primera tarjeta cuya ratio coincida con el máximo
-    best_search_result_xpath: str = get_search_result_xpath_by_ratio(driver, likely_ratio, pick.Participants)
+    best_search_result_xpath: str = get_search_result_xpath_by_ratio(driver, likely_ratio, pick.ParticipantNames)
     if best_search_result_xpath:
         set_pick_web_participant_names(driver, best_search_result_xpath, pick)
         sel_util.selenium_click(driver, best_search_result_xpath)
@@ -174,7 +174,7 @@ def place_bet(driver : uc.Chrome, bet : Bet, check_odds : bool):
     # TODO: elevar excepciones con información en cada fase del sub pipeline de colocación
     # TODO:
     try:
-        click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
+        click_selection(driver, bet.Pick.ParticipantNames, bet.Pick.Bet)
         # seleccionar la cuota
         click_selection_odds(driver, check_odds, bet.Pick.MinOdds)
         # tomar valor de la cuota colocada

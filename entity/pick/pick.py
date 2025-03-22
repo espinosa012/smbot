@@ -3,8 +3,8 @@ class Pick:
     Date : str
     Time : str
     Event : str
-    Participants : list = []    # TODO: podría llamarse ParticipantNames
-    Bet : dict = {} # {market, selection}
+    ParticipantNames : list = []    # TODO: podría llamarse ParticipantNames
+    Bet : dict = {"Market":"", "Selection":""} # {market, selection}
     WebParticipantNames : list
     MinOdds : float
     BetaminicStrategy : str
@@ -15,7 +15,7 @@ class Pick:
         self.Date = pick_dict["Date"] if pick_dict else ""
         self.Time = pick_dict["Date"] if pick_dict else ""
         self.Event = pick_dict["Event"] if pick_dict else ""
-        self.Participants = pick_dict["Participants"] if pick_dict else []
+        self.ParticipantNames = pick_dict["ParticipantNames"] if pick_dict else []
         self.WebParticipantNames = pick_dict["WebParticipantNames"] if pick_dict else []
         self.Bet = pick_dict["Bet"] if pick_dict else {"Market": "", "Selection": ""}
         self.MinOdds = pick_dict["MinOdds"] if pick_dict else 0
@@ -27,7 +27,7 @@ class Pick:
             "Date":self.Date,
             "Time":self.Time,
             "Event":self.Event,
-            "Participants":self.Participants,
+            "ParticipantNames":self.ParticipantNames,
             "WebParticipantNames":self.WebParticipantNames,
             "Bet":self.Bet,
             "MinOdds":self.MinOdds,

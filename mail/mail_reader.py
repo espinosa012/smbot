@@ -66,7 +66,7 @@ class MailReader:
         # noinspection PyTypeChecker
         return self.Connection.uid("search", None, self.Filter)[1][0].split()
 
-    def get_message_by_id(self, uid: int) -> Message:
+    def get_message_by_id(self, uid: int) -> Message | None:
         """ Devuelve el mensaje (mailbox.Message) con id única igual a uid """
         try:
             # noinspection PyTypeChecker
@@ -117,7 +117,6 @@ class MailReader:
     def process_new_messages(self):
         self.connect()
         new_messages_ids: list = self.get_new_messages_ids()
-        print(new_messages_ids)
         # procesamos las ids no procesadas y lanzamos los picks
         self.process_messages(new_messages_ids)
 

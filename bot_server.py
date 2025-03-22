@@ -8,7 +8,7 @@ from flask import Flask, request
 from bettingbot.sportmarket.SMBot import SMBot
 from entity.bet.bet import Bet
 from entity.pick.pick import Pick
-from entity.user import User
+from entity.user.user import User
 from mail.mail_reader import MailReader
 
 app: Flask = Flask(__name__)
@@ -27,12 +27,8 @@ def index():
 
 @app.route('/watch', methods=['GET'])
 def watch():
-    # TODO: cambiar. nos conectamos cada x tiempo (periodo largo) y comprobamos los mensajes nuevos
-    mail_reader.connect()
-    print("Mail reader connected.")  # TODO: al logger
-    if not mail_reader.IsWatching:
-        print("Watching inbox...")  # TODO: al logger
-        threading.Thread(target=mail_reader.watch, args=([True])).start()
+    print("Watching inbox...")
+    threading.Thread(target=mail_reader.schedule_watching, args=([5])).start()
     return "ok"
 
 @app.route('/log', methods=['POST'])
@@ -65,33 +61,29 @@ def schedule_pick(pick: Pick):
 
 def place_pick(pick: Pick):
     # TODO: si se produce error en la colocación, deberíamos devolver False
-    # for user in db.get_active_users():
-    # for user in [get_config_users()[1]]:
     for user in [u for u in get_config_users() if u.IsActive]:
         bet: Bet = Bet(pick, user, user.DefaultStake)
+        print("------------------------------------------------")
         print(f"Placing bet for user {user.Username}")  # TODO: al logger
         bot : SMBot = SMBot(False)
         bot.place_bet(bet)  # TODO: gestionar excepción aquí
         bot.quit()
-        print("------------------------------------------------")
         # db.insert_bet(bet)    #TODO probar
 
 def get_request_pick(req) -> Pick:
     return Pick(pick_dict=json.loads(req.data))
 
-# TODO: coger de users.json
 def get_config_users():
     users: list = []
-    for user_dict in json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config/config.json'),
-                                    'r'))["users"]["betinasia"]:
+    for user_dict in json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config/users.json'),
+                                    'r'))["betinasia"]:
         users.append(User(user_dict["url"], user_dict["username"], user_dict["password"], user_dict["default_stake"],
                           user_dict["active"]))
     return users
 
-# TODO: parámetros de lanzamiento: headless, procesar mensajes previos de la bandeja de entrada
-
 
 if __name__ == '__main__':
+    # TODO: tomar de config
     host : str = "0.0.0.0"
     port : int = 5000
 
