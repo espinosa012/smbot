@@ -1,7 +1,8 @@
 flask
-setuptools
 selenium
+setuptools
 undetected-chromedriver
 bs4
 thefuzz
 pymongo
+schedule

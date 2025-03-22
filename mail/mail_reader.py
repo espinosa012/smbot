@@ -2,6 +2,7 @@ import email
 import imaplib
 import json
 import time
+import schedule
 from mailbox import Message
 
 import requests
@@ -20,6 +21,8 @@ class MailReader:
     CredentialsFilePath: str
     SleepTime: int
     IsWatching: bool = False
+
+    ProcessedIds: list = []
 
     def __init__(self, _filter: str = "ALL", mail_box: str = "INBOX", sleep_time: int = 5):
         self.Email, self.Password = self.get_credentials()
@@ -75,11 +78,9 @@ class MailReader:
             print(e)  # TODO: al logger
         return None
 
-    def get_new_messages_ids(self, already_processed_ids: list = None):
+    def get_new_messages_ids(self):
         """ Devuelve la lista de ids únicas correspondientes a los mensajes del MailBox que aún no hayan sido procesados."""
-        new_messages_ids: list = []
-        # if bool(already_processed_ids): new_messages_ids = list(set(self.get_current_message_ids()) - set(already_processed_ids))
-        new_messages_ids = list(set(self.get_current_message_ids()) - set(already_processed_ids))
+        new_messages_ids : list  = list(set(self.get_current_message_ids()) - set(self.ProcessedIds))
         if len(new_messages_ids) != 0:
             new_messages_ids.sort()
             pass  # TODO: indicar en logger la llegada de nuevos mensajes
@@ -87,6 +88,13 @@ class MailReader:
 
     def stop_watching(self):
         self.IsWatching = False
+
+    def schedule_watching(self, sleep_seconds : int):
+        schedule.every(sleep_seconds).seconds.do(self.process_new_messages)
+        self.process_new_messages()
+        while True:
+            schedule.run_pending()
+            time.sleep(2)
 
     # TODO: a lo mejor con schedule podemos cambiar el método de escucha y mirar los mensajes cada x tiempo sin usar el while
     def watch(self, process_previous_messages: bool = False):
@@ -106,11 +114,17 @@ class MailReader:
             self.process_messages(new_messages_ids, processed_ids)
             time.sleep(self.SleepTime)
 
-    def process_messages(self, message_ids: list, already_processed_ids: list):
+    def process_new_messages(self):
+        self.connect()
+        new_messages_ids: list = self.get_new_messages_ids()
+        print(new_messages_ids)
+        # procesamos las ids no procesadas y lanzamos los picks
+        self.process_messages(new_messages_ids)
+
+    def process_messages(self, message_ids: list):
         """ Procesa un conjunto de mensajes. En cada mensaje puede venir más de un pick"""
         for _id in message_ids:
-            already_processed_ids.append(
-                _id)  # TODO: a lo mejor es mejor que la lista de ids procesadas se defina en el servidor
+            self.ProcessedIds.append(_id)
             self.process_message(self.get_message_by_id(_id))
 
     def process_message(self, msg_obj: Message):

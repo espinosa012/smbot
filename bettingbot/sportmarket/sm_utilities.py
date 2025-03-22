@@ -16,6 +16,7 @@ import time
 def login(driver: uc.Chrome, username: str, password: str) -> bool:
     try:
         sel_util.wait_element_clickable(driver, pom.LOGIN_BUTTON)
+        sel_util.random_wait(0.3, 0.6)
         sel_util.selenium_send_keys(driver, pom.LOGIN_USERNAME, username)
         sel_util.selenium_send_keys(driver, pom.LOGIN_PASSWORD, password)
         sel_util.selenium_click(driver, pom.LOGIN_BUTTON)

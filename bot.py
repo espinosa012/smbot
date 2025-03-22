@@ -17,18 +17,19 @@ def get_config_users():
     return users
 
 
-bot = SMBot(False)
-pick = Pick()
-pick.Event = "Los Chankas - Cienciano"
-pick.Participants = ["Los Chankas", "Cienciano"]
-pick.Bet = {"Market":"1X2", "Selection":"H"}
+# bot = SMBot(False)
+# pick = Pick()
+# pick.Event = "Los Chankas - Cienciano"
+# pick.Participants = ["Los Chankas", "Cienciano"]
 # pick.Bet = {"Market":"1X2", "Selection":"H"}
-pick.MinOdds = 1.8
-bot.place_bet(Bet(pick, get_config_users()[1], 0.6))
-bot.quit()
+# # pick.Bet = {"Market":"1X2", "Selection":"H"}
+# pick.MinOdds = 1.8
+# bot.place_bet(Bet(pick, get_config_users()[1], 0.6))
+# bot.quit()
 
-# if __name__ == "__main__":
-#     reader = MailReader()
-#     reader.connect()
-#     # reader.retrieve_inbox_messages()
-#     reader.watch(process_previous_messages=True)
+if __name__ == "__main__":
+    reader = MailReader()
+    reader.connect()
+    reader.schedule_watching(3)
+    # reader.retrieve_inbox_messages()
+    # reader.watch(process_previous_messages=True)
