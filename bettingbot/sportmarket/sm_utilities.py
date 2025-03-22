@@ -175,7 +175,7 @@ def place_bet(driver : uc.Chrome, bet : Bet, check_odds : bool):
     try:
         click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
         # seleccionar la cuota
-        click_selection_odds(driver, check_odds)
+        click_selection_odds(driver, check_odds, bet.Pick.MinOdds)
         # tomar valor de la cuota colocada
         bet.PlacedOdd = get_placed_odds(driver)
         # mandar stake y clic en apostar
@@ -198,10 +198,13 @@ def click_selection(driver : uc.Chrome, participants : list, bet : dict):
     except Exception as e:
         raise Exception(f"Error clicking selection: {e}")
 
-def click_selection_odds(driver : uc.Chrome, check_odds : bool):
+def click_selection_odds(driver : uc.Chrome, check_odds : bool, min_odds : float = -1.0):
     # TODO: comprobar la cuota según el argumento check_odds
     sel_util.wait_element_visible(driver, pom.PLACER_MODAL_DIV)
     time.sleep(random.uniform(0.3, 0.6))
+    # TODO: aquí, si check_odds es true y la cuota máxima está por debajo del mínimo, se interrumpe la colocación.
+    # TODO: necesita recibir la cuota mínima
+
     sel_util.wait_element_clickable(driver, pom.PLACER_MODAL_DIV + pom.AVAILABLE_ODDS_SPAN)
     time.sleep(random.uniform(0.25, 0.5))
     available_odds_text = [sp.text for sp in sel_util.find_elements_by_xpath(driver, pom.AVAILABLE_ODDS_SPAN)]
@@ -213,12 +216,10 @@ def click_selection_odds(driver : uc.Chrome, check_odds : bool):
                            - max_odds_subtraction) # TODO: a config
     sel_util.find_element_by_text(driver, pom.AVAILABLE_ODDS_SPAN, available_odds_text[available_odds_numeric_value
                                   .index(min(available_odds_numeric_value, key=lambda x: abs(x - target_odds)))]).click()
-
     # TODO: leer los valores de las cuotas disponibles y tomar uno que esté unos 15-20 cent por debajo del máximo.
     # también disponemos del valor mínimo y el promedio. Podríamos establecer ciertas normas: si la diferencia entre
     # el máximo y el mínimo es inferior a X (0.2), colocamos el mínimo. Si no, podemos analizar las cuotas disponibles
     # y decidir (eliminar valores extremos, colocar a mano cierto valor para la cuota, etc)
-
     # TODO: crear enum ODDS_STRATEGY: promedio, máximo, mínimo, alguno de los anteriores +- lo que sea, etc
     time.sleep(random.uniform(0.3, 0.6))
 
@@ -390,11 +391,11 @@ def remove_event_from_favourites(driver : uc.Chrome, participants : list, retry 
         sel_util.wait_element_clickable(driver, pom.FAVOURITE_EVENT_ICON, 5)
         sel_util.random_wait(0.85, 1.5)
         sel_util.selenium_click(driver, get_favourite_event_row_xpath(driver, participants) + pom.FAVOURITE_EVENT_ICON)
-        sel_util.wait_element_invisible(driver, get_favourite_event_row_xpath(driver, participants))
-        sel_util.wait_element_visible(driver, f"{pom.FAVOURITES_SECTION_TBODY}")
+        sel_util.random_wait(1  , 2)
+        sel_util.wait_element_visible(driver, f"{pom.NO_FAVOURITE_EVENTS}")
     except Exception as e:
         if retry:   remove_event_from_favourites(driver, participants, False)
-        else: print(f"Error removing favourite event after retrying: {e}")
+        else: print(f"Error removing favourite event ({participants[0]} - {participants[1]})")
 
 def close_footer(driver : uc.Chrome):
     # TODO: logger

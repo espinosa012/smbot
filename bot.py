@@ -19,9 +19,9 @@ def get_config_users():
 
 bot = SMBot(False)
 pick = Pick()
-pick.Event = "Granada CF - R. Oviedo"
-pick.Participants = ["Granada CF", "R. Oviedo"]
-pick.Bet = {"Market":"1X2", "Selection":"D"}
+pick.Event = "Los Chankas - Cienciano"
+pick.Participants = ["Los Chankas", "Cienciano"]
+pick.Bet = {"Market":"1X2", "Selection":"H"}
 # pick.Bet = {"Market":"1X2", "Selection":"H"}
 pick.MinOdds = 1.8
 bot.place_bet(Bet(pick, get_config_users()[1], 0.6))

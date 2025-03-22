@@ -25,9 +25,8 @@ SEARCH_MODAL_ALL_SPORTS_FILTER = "//li[contains(@class, 'sportsListItem ')][1]"
 # Favourites section
 FAVOURITES_SECTION_TBODY = "//tbody[contains(@class, 'styles_favourite')]" # se puede usar para comprobar que hemos hecho login bien
 EVENT_ROW_TR = "//tr[contains(@class, 'eventRow')]" # RESPECTO DE FAVOURITES_SECTION
-FAVOURITE_EVENT_ICON = "//*[local-name()='svg' and contains(@class, 'favouriteIcon')]"
+FAVOURITE_EVENT_ICON = "//*[local-name()='svg' and contains(@class, 'favouriteIcon') and contains(@class, 'selected')]"
 NO_FAVOURITE_EVENTS = "//div[contains(@class, 'noSelectedEventMessage')]"
-# al hacer clic en favorito, dentro de la sección Favoritos, se elimina la fila del evento del dom
 
 # SELECTIONS
 # Market 1x2

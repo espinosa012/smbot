@@ -20,12 +20,10 @@ mail_reader: MailReader = MailReader()
 #  2. Cuando una apuesta falle, notificar, almacenar en base de datos e implementar un método ágil para reintentar
 #  3. Repasar bien todo el tema de base de datos (config, tablas, qué guardamos...)
 #  4. En sm utilities, elevar excepciones con información para saber en qué punto del pipeline de colocación se ha producido el error
-#  5. Mirar error de list out of index (Granada...)
 
 @app.route('/')
 def index():
     return 'BetSheet Home'
-
 
 @app.route('/watch', methods=['GET'])
 def watch():
