@@ -1,6 +1,5 @@
 {
-    "users": {
-        "betinasia" : [
+  "betinasia" : [
             {"username":"juamvu", "password":"London2098", "url": "https://pro.sportmarket.com/login?next=/trade",
                 "active": true, "bookie":"sportmarket", "default_stake": 4 },
             {"username":"espinosa024", "password":"google8ARE#betinasia", "url": "https://black.betinasia.com/",
@@ -10,19 +9,4 @@
             {"username":"salvatella93", "password":"Salvatella93@123", "url": "https://black.betinasia.com/",
                 "active": true, "bookie":"betinasia", "default_stake": 1 }
         ]
-    },
-
-    "email_credentials" : {
-        "email": "smbot21610@gmail.com",
-        "app_password": "yjts ecqp sgqg aotr"
-    },
-
-    "server" : {
-        "address": "http://127.0.0.1:5000",
-        "host": "",
-        "port": ""
-    },
-
-    "mongo_server": "mongodb://localhost:27017/"
-
 }

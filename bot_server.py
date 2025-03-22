@@ -15,6 +15,13 @@ app: Flask = Flask(__name__)
 mail_reader: MailReader = MailReader()
 
 
+# TODO: lista de tareas:
+#  1. leer el correo cada x tiempo con schedule, iniciando sesión cada vez, para que no caduque la sesión
+#  2. Cuando una apuesta falle, notificar, almacenar en base de datos e implementar un método ágil para reintentar
+#  3. Repasar bien todo el tema de base de datos (config, tablas, qué guardamos...)
+#  4. En sm utilities, elevar excepciones con información para saber en qué punto del pipeline de colocación se ha producido el error
+#  5. Mirar error de list out of index (Granada...)
+
 @app.route('/')
 def index():
     return 'BetSheet Home'
@@ -74,6 +81,7 @@ def place_pick(pick: Pick):
 def get_request_pick(req) -> Pick:
     return Pick(pick_dict=json.loads(req.data))
 
+# TODO: coger de users.json
 def get_config_users():
     users: list = []
     for user_dict in json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config/config.json'),

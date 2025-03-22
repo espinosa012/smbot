@@ -10,8 +10,7 @@ import bettingbot.sportmarket.pageobject as pom
 import random
 import time
 
-# TODO: loggers por todos lados
-
+# TODO: loggers por todos lados !!
 # TODO: usar método de espera aleatorio de la utilidad
 
 def login(driver: uc.Chrome, username: str, password: str) -> bool:
@@ -133,17 +132,27 @@ def get_search_result_most_likely_ratio(driver : uc.Chrome, searched_term : str,
     """
     max_ratio : float = 0
     search_term(driver, searched_term)
-    if no_results_found(driver):
-        return 0
-
-    sel_util.wait_element_clickable(driver, pom.SEARCH_RESULT_CARD)
-    sel_util.random_wait(0.1, 0.3)
-    for i in range(0, len(sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD))):
+    if no_results_found(driver):    return 0
+    event_string_sep : str = " vs. "     # TODO: a config el participants separator
+    # for i in range(0, len(sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD))):
+    for i in get_search_result_card_indexes(driver, event_string_sep):
         xpath : str = f"{pom.SEARCH_RESULT_CARD}[{i+1}]{pom.SEARCH_RESULT_NAME}"
         search_result_event_string : str = sel_util.find_element_by_xpath(driver, xpath).text.lower()
-        search_result_event_participants : list = [p.strip() for p in search_result_event_string.split(" vs. ")]    # TODO: a config el participants separator
+        search_result_event_participants : list = [p.strip() for p in search_result_event_string.split(event_string_sep)]
         max_ratio = max(max_ratio, compute_ratio(participants, search_result_event_participants))
     return max_ratio
+
+# De todas las tarjetas de evento que se muestran en el modal de búsqueda, devuelve una lista de enteros correspondiente a los índices de
+# las tarjetas que verdaderamente son de evento
+def get_search_result_card_indexes(driver : uc.Chrome, event_string_separator : str = " vs. ") -> list:
+    event_result_cards_indexes = []
+    sel_util.wait_element_clickable(driver, pom.SEARCH_RESULT_CARD)
+    sel_util.random_wait(0.1, 0.3)
+    search_results = sel_util.find_elements_by_xpath(driver, pom.SEARCH_RESULT_CARD)
+    for i in range(0, len(search_results)):
+        if event_string_separator in search_results[i].text:
+            event_result_cards_indexes.append(i)
+    return event_result_cards_indexes
 
 def compute_ratio(pick_participants : list, search_result_event_participants : list) -> float:
     home_ratio: float = fuzz_helper.get_ratio(pick_participants[0].lower(), search_result_event_participants[0].lower())
@@ -161,6 +170,8 @@ def compute_ratio(pick_participants : list, search_result_event_participants : l
 # MARKETS
 def place_bet(driver : uc.Chrome, bet : Bet, check_odds : bool):
     # clic en la cuota que corresponda
+    # TODO: elevar excepciones con información en cada fase del sub pipeline de colocación
+    # TODO:
     try:
         click_selection(driver, bet.Pick.Participants, bet.Pick.Bet)
         # seleccionar la cuota
@@ -179,10 +190,13 @@ def place_bet(driver : uc.Chrome, bet : Bet, check_odds : bool):
         return False
 
 def click_selection(driver : uc.Chrome, participants : list, bet : dict):
-    if is_asian_selection(bet):
-        click_asian_selection(driver, participants, bet)
-    else:
-        click_1x2_selection(driver, participants, bet)
+    try:
+        if is_asian_selection(bet):
+            click_asian_selection(driver, participants, bet)
+        else:
+            click_1x2_selection(driver, participants, bet)
+    except Exception as e:
+        raise Exception(f"Error clicking selection: {e}")
 
 def click_selection_odds(driver : uc.Chrome, check_odds : bool):
     # TODO: comprobar la cuota según el argumento check_odds
